@@ -1,0 +1,1094 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0a0e1a" />
+<title>Outbound Cockpit</title>
+<style>
+  :root{
+    --bg:#0a0e1a; --bg2:#0d1424; --card:#0f1830; --card2:#16213d; --cardhi:#1b2a4a;
+    --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.16);
+    --txt:#eef3fb; --mut:#9db0d0; --faint:#647698;
+    --brand:#2f6bff; --brand2:#5b8cff; --grad:linear-gradient(135deg,#2f6bff,#1b48d6);
+    --good:#2fd478; --warn:#f7b733; --bad:#ff5d6c;
+    --A:#5b8cff; --B:#b57bff; --C:#22d3ee; --D:#f7b733;
+    --inset:#070c18; --headbg:rgba(10,14,26,.92); --tint:rgba(47,107,255,.10);
+    --r:16px;
+  }
+  body.light{
+    --bg:#f4f7fc; --bg2:#eef2f9; --card:#ffffff; --card2:#eef3fb; --cardhi:#e2eaf7;
+    --line:rgba(13,30,60,.10); --line2:rgba(13,30,60,.20);
+    --txt:#10203a; --mut:#46587a; --faint:#7d8db0;
+    --brand2:#2f6bff;
+    --inset:#ffffff; --headbg:rgba(255,255,255,.9); --tint:rgba(47,107,255,.07);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  html{overflow-x:hidden}
+  body{background:radial-gradient(1200px 600px at 80% -10%,var(--tint),transparent 60%),var(--bg);
+    color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased;
+    padding-bottom:calc(82px + env(safe-area-inset-bottom,0px));transition:background .2s,color .2s;overflow-x:hidden}
+  a{color:var(--brand2);text-decoration:none}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+  /* header */
+  header.top{position:sticky;top:0;z-index:30;background:var(--headbg);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  .themebtn{margin-left:8px;width:32px;height:32px;border-radius:9px;border:1px solid var(--line2);background:var(--card2);color:var(--txt);font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center}
+  .themebtn:hover{border-color:var(--brand2)}
+  .brandrow{display:flex;align-items:center;gap:11px;max-width:1080px;margin:0 auto;padding:13px 16px}
+  .logo{width:30px;height:30px;border-radius:9px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:15px;box-shadow:0 6px 18px rgba(47,107,255,.45)}
+  .brandname{font-weight:750;letter-spacing:-.01em;font-size:15px}
+  .brandname small{display:block;color:var(--faint);font-weight:500;font-size:11px}
+  .sync{margin-left:auto;font-size:11px;color:var(--faint);display:flex;align-items:center;gap:6px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+  .dot.on{background:var(--good);box-shadow:0 0 8px var(--good)}
+  /* stepper */
+  .stepper{display:flex;gap:8px;max-width:1080px;margin:0 auto;padding:10px 16px 0;overflow-x:auto}
+  .step{flex:1;min-width:128px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:10px 12px;text-align:left;transition:.18s;position:relative}
+  .step:hover{border-color:var(--line2);transform:translateY(-1px)}
+  .step.active{border-color:var(--brand);background:linear-gradient(180deg,rgba(47,107,255,.12),var(--card))}
+  .step .sn{font-size:10.5px;color:var(--faint);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  .step .st{font-size:13.5px;font-weight:700;margin-top:2px;display:flex;align-items:center;gap:7px}
+  .step .sc{margin-left:auto;background:var(--card2);color:var(--mut);font-size:11px;font-weight:700;padding:1px 8px;border-radius:10px}
+  .step.active .sc{background:var(--brand);color:#fff}
+  .step .sd{font-size:11px;color:var(--faint);margin-top:1px}
+  /* views */
+  .view{padding-top:6px}
+  h2.sec{font-size:12px;text-transform:uppercase;letter-spacing:.09em;color:var(--faint);margin:22px 0 10px;font-weight:750}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:15px;margin-bottom:13px}
+  .pcard{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:15px;margin-bottom:13px;transition:.18s}
+  .pcard:hover{border-color:var(--line2)}
+  .row1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .nm{font-weight:750;font-size:15.5px;word-break:break-word}
+  .badge{font-size:10px;font-weight:800;padding:3px 8px;border-radius:20px;letter-spacing:.04em;text-transform:uppercase;flex-shrink:0}
+  .b-A{background:rgba(91,140,255,.18);color:#a9c4ff}
+  .b-B{background:rgba(181,123,255,.18);color:#d6bcff}
+  .b-C{background:rgba(34,211,238,.16);color:#8af0ff}
+  .b-D{background:rgba(247,183,51,.16);color:#ffd98a}
+  .chip{font-size:11px;color:var(--mut);background:var(--card2);border:1px solid var(--line);padding:3px 9px;border-radius:20px}
+  .sig{color:var(--mut);font-size:12.5px;margin:9px 0 7px;overflow-wrap:anywhere;word-break:break-word}
+  .sig b{color:var(--txt)}
+  .msg{width:100%;min-height:104px;background:var(--inset);border:1px solid var(--line);border-radius:11px;color:var(--txt);padding:11px;font-size:13px;line-height:1.6;resize:vertical;font-family:inherit}
+  .hint{font-size:11px;color:var(--faint);margin-top:5px}
+  .cardbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}
+  .btn{border:1px solid var(--line2);background:var(--card2);color:var(--txt);padding:9px 13px;border-radius:10px;font-weight:650;font-size:12.5px;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+  .btn:hover{border-color:var(--brand2);transform:translateY(-1px)}
+  .btn.primary{background:var(--grad);border-color:transparent;color:#fff;box-shadow:0 6px 16px rgba(47,107,255,.32)}
+  .btn.good{background:rgba(47,212,120,.14);border-color:rgba(47,212,120,.4);color:#86eeb0}
+  .btn.ghost{background:none}
+  .btn.sm{padding:6px 10px;font-size:11.5px}
+  .btn:active{transform:translateY(1px)}
+  .muted{color:var(--mut)} .faint{color:var(--faint)}
+  .timehint{font-size:11px;color:var(--warn);font-weight:700}
+  .timehint.ok{color:var(--good)}
+  .empty{text-align:center;color:var(--faint);padding:34px 16px}
+  .empty .big{font-size:16px;color:var(--mut);font-weight:700;margin-bottom:6px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(146px,1fr));gap:11px}
+  .stat{background:linear-gradient(180deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:14px;padding:14px}
+  .stat .v{font-size:26px;font-weight:850;letter-spacing:-.02em}
+  .stat .l{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-top:3px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -2px}
+  .tblwrap table{min-width:520px}
+  .plantbl{min-width:640px}
+  th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--faint);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em}
+  .tag{font-size:10px;font-weight:800;padding:2px 8px;border-radius:7px}
+  .tag.scale{background:rgba(47,212,120,.16);color:#86eeb0}
+  .tag.kill{background:rgba(255,93,108,.16);color:#ffa3ac}
+  .tag.watch{background:rgba(247,183,51,.16);color:#ffd98a}
+  .tag.data{background:var(--card2);color:var(--faint)}
+  .field{margin-bottom:11px}
+  .field label{display:block;font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+  .field input,.field select,.field textarea{width:100%;background:var(--inset);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px;font-size:13px;font-family:inherit}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--brand)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .modal{position:fixed;inset:0;z-index:50;background:rgba(2,5,12,.72);display:none;align-items:flex-start;justify-content:center;padding:18px;padding-top:max(18px,env(safe-area-inset-top));overflow:auto;-webkit-overflow-scrolling:touch}
+  .modal.open{display:flex}
+  .modal .inner{background:var(--card);border:1px solid var(--line2);border-radius:18px;padding:19px;max-width:580px;width:100%;margin-top:24px;max-height:calc(100vh - 48px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overflow-y:auto;-webkit-overflow-scrolling:touch;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  .modal .inner b,.modal .inner .row1{overflow-wrap:anywhere;word-break:break-word}
+  .toast{position:fixed;bottom:calc(84px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(8px);background:#1a2848;border:1px solid var(--line2);color:#fff;padding:11px 17px;border-radius:12px;z-index:60;opacity:0;transition:.22s;font-weight:650;font-size:13px;pointer-events:none;max-width:min(92vw,420px);text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .fab{position:fixed;right:18px;bottom:calc(80px + env(safe-area-inset-bottom,0px));z-index:40;width:56px;height:56px;border-radius:50%;background:var(--grad);color:#fff;font-size:28px;box-shadow:0 12px 30px rgba(47,107,255,.5)}
+  /* bottom nav (mobile-friendly, app-like) */
+  .bnav{position:fixed;bottom:0;left:0;right:0;z-index:35;background:var(--headbg);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;padding:6px 4px env(safe-area-inset-bottom)}
+  .bnav button{flex:1;padding:8px 2px;color:var(--faint);font-size:10.5px;font-weight:650;display:flex;flex-direction:column;align-items:center;gap:3px}
+  .bnav button.active{color:var(--brand2)}
+  .bnav svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:2}
+  .help h3{margin:18px 0 6px;font-size:15px} .help p,.help li{color:var(--mut);font-size:13px}
+  .seg{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);gap:8px}
+  .lead{display:flex;align-items:flex-start;gap:10px;padding:11px;border:1px solid var(--line);border-radius:12px;margin-bottom:9px;background:var(--bg2)}
+  .lead input[type=checkbox]{width:18px;height:18px;margin-top:2px;accent-color:var(--brand)}
+  .src-btns{display:flex;gap:9px;flex-wrap:wrap;margin:6px 0 4px}
+  .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+  .caldow{text-align:center;font-size:10px;color:var(--faint);font-weight:700;padding:2px 0}
+  .calday{position:relative;aspect-ratio:1;border:1px solid var(--line);border-radius:10px;background:var(--bg2);color:var(--mut);font-size:12px;display:flex;align-items:flex-start;justify-content:flex-start;padding:5px;transition:.12s}
+  .calday:hover{border-color:var(--line2)}
+  .calday em{position:absolute;bottom:4px;right:4px;font-style:normal;font-size:10px;font-weight:800;color:#fff;background:var(--brand);border-radius:8px;padding:0 5px;min-width:16px;text-align:center}
+  .calday.caltoday{border-color:var(--brand2);color:#fff}
+  .calday.calsel{background:var(--cardhi);border-color:var(--brand);color:#fff}
+  .rangechips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .rchip{background:var(--bg2);border:1px solid var(--line);color:var(--mut);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:650;cursor:pointer;transition:.12s}
+  .rchip:hover{border-color:var(--line2)}
+  .rchip.on{background:var(--grad);border-color:transparent;color:#fff}
+  .selwrap{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--faint);background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:4px 8px}
+  .selwrap select{background:transparent;border:0;color:var(--txt);font-size:12px;font-weight:600;outline:none;cursor:pointer}
+  .selwrap select option{background:var(--card2);color:var(--txt)}
+  .feedcard{background:linear-gradient(135deg,rgba(47,107,255,.14),rgba(27,42,74,.5));border-color:var(--brand)}
+  .feedhead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  details.adv{margin:6px 0 4px}
+  details.adv>summary{cursor:pointer;font-size:13px;color:var(--brand2);font-weight:650;padding:8px 2px;list-style:none}
+  details.adv>summary::-webkit-details-marker{display:none}
+  details.adv>summary::before{content:"\203A  ";font-weight:800}
+  details.adv[open]>summary::before{content:"\2304  "}
+  .geochks{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+  .gchk{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--mut);background:var(--bg2);border:1px solid var(--line);border-radius:999px;padding:5px 11px;cursor:pointer}
+  .gchk.on{background:rgba(47,107,255,.18);border-color:var(--brand);color:#fff}
+  .gchk input{accent-color:var(--brand);margin:0}
+  .filterbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:2px 0 12px}
+  .filterbar select{background:var(--bg2);border:1px solid var(--line);color:var(--txt);border-radius:999px;padding:8px 12px;font-size:12px;font-weight:600;outline:none;cursor:pointer}
+  .searchin{flex:1;min-width:0;width:100%;background:var(--inset);border:1px solid var(--line);color:var(--txt);border-radius:999px;padding:8px 14px;font-size:13px;outline:none}
+  .searchin:focus{border-color:var(--brand)}
+  .fchip{background:var(--bg2);border:1px solid var(--line);color:var(--mut);border-radius:999px;padding:8px 13px;font-size:12px;font-weight:650;cursor:pointer;transition:.12s}
+  .fchip:hover{border-color:var(--line2)}
+  .fchip.on{background:var(--grad);border-color:transparent;color:#fff}
+  .capsbar{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 6px}
+  #agent-trace-live{margin-top:10px;padding:10px 12px;background:var(--card2);border:1px solid var(--line);border-radius:10px;font-size:12px}
+  .trace-step{padding:5px 0;border-bottom:1px dashed var(--line);color:var(--mut)}
+  .trace-step:last-child{border-bottom:0}
+  .trace-step.pending::before{content:"\25CB  ";color:var(--faint)}
+  .trace-step.running::before{content:"";display:inline-block;width:10px;height:10px;margin-right:6px;border:2px solid var(--line);border-top-color:var(--brand);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-1px}
+  .trace-step.done::before{content:"\2713  ";color:var(--good)}
+  .trace-step.fail::before{content:"\2717  ";color:#ffa3ac}
+  .capchip{font-size:11px;font-weight:700;color:var(--mut);background:var(--bg2);border:1px solid var(--line);border-radius:7px;padding:3px 9px}
+  .capchip.over{color:#ffb0b8;border-color:rgba(255,93,108,.45);background:rgba(255,93,108,.12)}
+  .btn.ai{background:linear-gradient(135deg,#7a3bff,#b14bff);border-color:transparent;color:#fff}
+  .btn.ai:hover{filter:brightness(1.08)}
+  /* calendar popover (small, closes on pick) */
+  .calpop-bd{position:fixed;inset:0;z-index:55;background:rgba(2,5,12,.5)}
+  .calpop{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:60;width:300px;max-width:92vw;max-height:86vh;overflow:auto;background:var(--card);border:1px solid var(--line2);border-radius:16px;padding:14px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+  .calpop .calgrid{gap:4px}
+  .calpop .calday{font-size:11px;padding:3px;border-radius:8px}
+  .calpop .calday em{font-size:9px;padding:0 4px;bottom:2px;right:2px}
+  /* responsive */
+  @media(max-width:900px){
+    .step{min-width:112px}
+    .brandrow{padding:11px 14px}
+  }
+  @media(max-width:720px){
+    .wrap{padding:0 12px}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(132px,1fr))}
+    .filterbar select{flex:1 1 calc(50% - 4px);min-width:140px}
+    .feedhead .btn{width:100%;justify-content:center}
+    .feedhead>div{flex:1 1 100%}
+  }
+  @media(max-width:560px){
+    .row2{grid-template-columns:1fr}
+    .stepper{display:none}
+    .brandname{font-size:14px}
+    .sync #synctxt{display:none}
+    .card,.pcard{padding:13px}
+    .stat .v{font-size:22px}
+    table{font-size:11.5px}th,td{padding:7px 5px}
+    .tblwrap table{min-width:480px}
+    .plantbl{min-width:560px}
+    .modal{padding:10px;padding-top:max(10px,env(safe-area-inset-top))}.modal .inner{margin-top:8px;padding:15px;border-radius:14px;max-height:calc(100dvh - 24px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}
+    .fab{right:14px;bottom:calc(74px + env(safe-area-inset-bottom,0px));width:52px;height:52px;font-size:26px}
+    .btn{min-height:40px}
+    .cardbtns .btn,.src-btns .btn{flex:1 1 calc(50% - 4px);justify-content:center}
+    .cardbtns .btn.primary,.src-btns .btn.primary{flex:1 1 100%}
+    .filterbar select{flex:1 1 100%;min-width:0}
+    .rangechips .rchip,.fchip{flex:1 1 auto}
+    .nm{font-size:14.5px}
+    .lead{flex-direction:row;align-items:flex-start}
+    .lead .faint{overflow-wrap:anywhere}
+    .selwrap{width:100%;justify-content:space-between}
+    .selwrap select{flex:1}
+  }
+  @media(max-width:380px){
+    .grid{grid-template-columns:1fr 1fr}
+    .bnav button{font-size:9.5px;padding:6px 1px}
+    .brandname small{display:none}
+    .cardbtns .btn,.src-btns .btn{flex:1 1 100%}
+  }
+  /* iOS: 16px inputs prevent auto-zoom on focus */
+  @media(max-width:768px){
+    .field input,.field select,.field textarea,.msg,.filterbar select,.searchin{font-size:16px}
+  }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brandrow">
+    <div class="logo">C</div>
+    <div class="brandname">Outbound Cockpit<small>Founder-led outreach</small></div>
+    <div class="sync"><span class="dot" id="syncdot"></span><span id="synctxt">local</span></div>
+    <button class="themebtn" id="themebtn" title="Toggle light / dark" onclick="toggleTheme()">&#9790;</button>
+  </div>
+  <div class="stepper" id="stepper">
+    <button class="step active" data-tab="leads"><div class="sn">Step 1</div><div class="st">Find leads<span class="sc" id="s-leads">0</span></div><div class="sd">source & import</div></button>
+    <button class="step" data-tab="today"><div class="sn">Step 2</div><div class="st">Today&rsquo;s queue<span class="sc" id="s-today">0</span></div><div class="sd">send personalized</div></button>
+    <button class="step" data-tab="pipeline"><div class="sn">Step 3</div><div class="st">Conversations<span class="sc" id="s-convo">0</span></div><div class="sd">replies &rarr; proposal</div></button>
+    <button class="step" data-tab="analytics"><div class="sn">Step 4</div><div class="st">Review<span class="sc" id="s-won">0</span></div><div class="sd">scale what works</div></button>
+  </div>
+</header>
+<div class="wrap">
+  <div id="view-leads" class="view"></div>
+  <div id="view-today" class="view" style="display:none"></div>
+  <div id="view-pipeline" class="view" style="display:none"></div>
+  <div id="view-analytics" class="view" style="display:none"></div>
+  <div id="view-calendar" class="view" style="display:none"></div>
+  <div id="view-prospects" class="view" style="display:none"></div>
+  <div id="view-settings" class="view" style="display:none"></div>
+  <div id="view-help" class="view" style="display:none"></div>
+</div>
+<button class="fab" id="fab" title="Add prospect">+</button>
+<nav class="bnav" id="bnav">
+  <button data-tab="leads" class="active"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>Leads</button>
+  <button data-tab="today"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Queue</button>
+  <button data-tab="pipeline"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-9 8.5 8.38 8.38 0 0 1-3.8-.9L3 20l1.9-5.2A8.38 8.38 0 0 1 4 11.5 8.5 8.5 0 0 1 12.5 3 8.38 8.38 0 0 1 21 11.5z"/></svg>Convos</button>
+  <button data-tab="analytics"><svg viewBox="0 0 24 24"><path d="M4 19V5M4 19h16M8 16v-5M12 16V8M16 16v-7"/></svg>Stats</button>
+  <button data-tab="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>Setup</button>
+</nav>
+<div class="modal" id="modal"><div class="inner" id="modalInner"></div></div>
+<div class="toast" id="toast"></div>
+<script>
+/* ============ CONFIG ============ */
+var TRACKS={A:"Funded",B:"Enterprise",C:"First-time",D:"Idea-stage"};
+var TRACK_DESC={A:"Founders/CTOs at funded startups (11\u2013200 staff)",B:"Innovation / digital / eng leaders at large orgs (1000+ staff)",C:"First-time founders at tiny / new companies (1\u201310 staff)",D:"Solo & idea-stage founders / owners (1\u201310 staff)"};
+var PLATFORMS=["LinkedIn","Twitter","Reddit","Email"];
+var GEOS=["IN-tier1","IN-tier2","IN-tier3","UAE","US-NRI","US-East","UK","SG","Saudi","Other"];
+var SAFE_CAPS={LinkedIn:25,Twitter:20,Reddit:4,Email:30};
+var CADENCE=[0,3,7,12,18];
+var SEND_WINDOWS={"IN-tier1":[10,20],"IN-tier2":[10,20],"IN-tier3":[10,20],"UAE":[11,15],"Saudi":[12,16],"SG":[9,13],"US-NRI":[18,22],"US-East":[18,22],"UK":[13,16],"Other":[10,20]};
+var DEFAULT_TARGETS={A:{LinkedIn:8,Email:1},B:{LinkedIn:1,Email:1},C:{LinkedIn:8},D:{LinkedIn:7}};
+var DEFAULT_SETTINGS={targets:DEFAULT_TARGETS,owner:"",token:""};
+
+var TEMPLATES={
+ A:{label:"Funded SaaS/AI founder",
+   body:"Scaling an AI product to real usage tends to surface the same quiet tension \u2014 moving fast while keeping the thing reliable and auditable enough for bigger buyers. How are you and the team navigating that as {company} grows? Genuinely interested in how you're approaching it.",
+   openers:{raised:"Hey {first} \u2014 congrats on the raise. [[custom: name the specific thing they're scaling next]]",hired_cto:"Hey {first} \u2014 saw {company} is building out engineering. [[custom: reference their hire/role]]",lost_cto:"Hey {first} \u2014 noticed {company} is between engineering leadership. [[custom: empathize w/ the gap]]",ai_arch:"Hey {first} \u2014 your take on [[custom: their AI architecture post]] was sharp.",hiring_eng:"Hey {first} \u2014 saw {company} is hiring senior engineers. [[custom: the role/pain implied]]",soc2:"Hey {first} \u2014 saw {company} is heading into enterprise/SOC 2 territory. [[custom: the trigger]]",scaling:"Hey {first} \u2014 your note on [[custom: their scaling challenge]] hit home.",default:"Hey {first} \u2014 been following what {company} is building. [[custom: one specific, real observation]]"}},
+ B:{label:"Enterprise innovation (warm)",
+   body:"Shipping AI inside a regulated enterprise is its own beast \u2014 usually the hard part is accountability and compliance, not the model itself. How is {company} handling that side as the innovation work scales? Always interested in how teams actually make that work in practice.",
+   openers:{intro:"Hi {first}, {referrer} suggested I reach out given {company}'s work on [[custom: initiative]].",innovation_role:"Hi {first} \u2014 congrats on the innovation mandate at {company}. [[custom: the initiative]]",transformation:"Hi {first} \u2014 saw {company}'s digital transformation push. [[custom: the program]]",default:"Hi {first} \u2014 reaching out re: {company}'s innovation roadmap. [[custom: specific hook]]"}},
+ C:{label:"First-time founder w/ capital",
+   body:"A lot of first-time founders lose months to the wrong build path \u2014 a freelancer who ships something throwaway, or a co-founder search that stalls out. Where are you at on actually getting {company} built? Happy to be a sounding board, even if it's just an honest second opinion.",
+   openers:{cofounder:"Hey {first} \u2014 saw your post about looking for a technical co-founder for {company}. [[custom: the bit that resonated]]",find_dev:"Hey {first} \u2014 saw you're trying to find a developer for [[custom: their idea]].",just_incorporated:"Hey {first} \u2014 congrats on starting {company}. [[custom: what they're building]]",stealth:"Hey {first} \u2014 'building in stealth' caught my eye. [[custom: the space they're in]]",milestone:"Hey {first} \u2014 love that you shipped [[custom: their milestone]].",accelerator:"Hey {first} \u2014 saw {company} came through [[custom: accelerator]]. Congrats.",default:"Hey {first} \u2014 been following {company}. [[custom: one specific real thing]]"}},
+ D:{label:"Idea-stage / non-technical",
+   body:"The hardest early call is usually what to build first \u2014 and what to leave out \u2014 before real money goes in. How are you thinking about scoping {company} down to a first version? Glad to talk it through if that's useful at all.",
+   openers:{cofounder:"Hey {first} \u2014 saw you're looking for a technical co-founder. [[custom: their idea]] Quick thought \u2014",mvp_cost:"Hey {first} \u2014 saw your question about MVP cost. [[custom: their specific idea]]",idea_help:"Hey {first} \u2014 saw your post about [[custom: their idea]]. Genuinely interesting.",validation:"Hey {first} \u2014 you're asking the right validation questions about [[custom: idea]].",new_founder:"Hey {first} \u2014 saw you're starting out on [[custom: their idea]].",default:"Hey {first} \u2014 [[custom: reference their specific post/idea]]"}}
+};
+
+/* ============ STORE (cloud sync + localStorage fallback) ============ */
+var KEY="outbound_cockpit_v1",SKEY="outbound_cockpit_settings_v1";
+function migrateStorageKeys(){
+  try{
+    if(!localStorage.getItem(KEY)&&localStorage.getItem("corazor_cockpit_v1")){localStorage.setItem(KEY,localStorage.getItem("corazor_cockpit_v1"));}
+    if(!localStorage.getItem(SKEY)&&localStorage.getItem("corazor_cockpit_settings_v1")){localStorage.setItem(SKEY,localStorage.getItem("corazor_cockpit_settings_v1"));}
+    var mk={corazor_cockpit_feed_date_v1:"outbound_cockpit_feed_date_v1",corazor_cockpit_feed_page_v1:"outbound_cockpit_feed_page_v1",corazor_cockpit_seen_v1:"outbound_cockpit_seen_v1",corazor_cockpit_feed_geos:"outbound_cockpit_feed_geos",corazor_theme:"outbound_cockpit_theme"};
+    Object.keys(mk).forEach(function(oldK){var nk=mk[oldK];if(!localStorage.getItem(nk)&&localStorage.getItem(oldK))localStorage.setItem(nk,localStorage.getItem(oldK));});
+  }catch(e){}
+}
+migrateStorageKeys();
+var CLOUD=false, syncTimer=null;
+var DATA=[], SETTINGS=loadSettings();
+function loadSettings(){try{return Object.assign({},DEFAULT_SETTINGS,JSON.parse(localStorage.getItem(SKEY))||{})}catch(e){return DEFAULT_SETTINGS}}
+function localLoad(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return[]}}
+function localSave(){localStorage.setItem(KEY,JSON.stringify(DATA));localStorage.setItem(SKEY,JSON.stringify(SETTINGS))}
+function hdrs(){var h={"Content-Type":"application/json"};if(SETTINGS.token)h["x-cockpit-token"]=SETTINGS.token;return h}
+function isSampleRow(p){var u=(p&&p.profile)||"";return !!(p&&p.source!=="apollo"&&(/\/example\d*\b/.test(u)||u.indexOf("/r/startups")>-1||u.indexOf("twitter.com/example")>-1));}
+function stripSamples(arr){return (arr||[]).filter(function(p){return !isSampleRow(p);});}
+async function bootStore(){
+  try{
+    var r=await fetch("/api/cockpit",{headers:hdrs()});
+    if(r.ok){var j=await r.json();var raw=(j.prospects||[]);DATA=stripSamples(raw);CLOUD=true;setSync(true,"cloud synced");
+      if(DATA.length===0){var loc=stripSamples(localLoad());if(loc.length){DATA=loc;}}
+      if(DATA.length!==raw.length)pushCloud();
+      migrateMessages();localSave();mergeCloudSeen();return;}
+  }catch(e){}
+  CLOUD=false;DATA=stripSamples(localLoad());setSync(false,"local only");migrateMessages();
+}
+// One-time cleanup of messages built before the referrer fix: only rebuilds
+// messages that still contain the old "[[custom: referrer]]" placeholder, and
+// tries to recover the referrer name from the signal ("Warm intro via X").
+function extractReferrer(p){var s=(p&&p.signal)||"";var m=s.match(/(?:warm intro|intro|referr(?:ed|al))\s*(?:via|by|from)?\s*[:\-]?\s*(.+)/i);if(m){var name=m[1].trim().replace(/[.;,]+$/,"");if(name&&name.length<=40)return name;}return "";}
+function migrateMessages(){var changed=false;DATA.forEach(function(p){if(p.message&&p.message.indexOf("[[custom: referrer]]")>=0){if(!p.referrer){var r=extractReferrer(p);if(r)p.referrer=r;}p.message=assembleMessage(p);changed=true;}});if(changed){localSave();if(CLOUD)pushCloud();}return changed;}
+function pushCloud(){
+  if(!CLOUD)return;
+  clearTimeout(syncTimer);
+  syncTimer=setTimeout(function(){
+    fetch("/api/cockpit",{method:"PUT",headers:hdrs(),body:JSON.stringify({prospects:DATA})})
+      .then(function(r){setSync(r.ok,r.ok?"cloud synced":"sync error")}).catch(function(){setSync(false,"sync error")});
+  },700);
+}
+function persist(){localSave();pushCloud()}
+function setSync(on,txt){var d=document.getElementById("syncdot"),t=document.getElementById("synctxt");if(d)d.classList.toggle("on",!!on);if(t)t.textContent=txt}
+
+/* ============ HELPERS ============ */
+function uid(){return "p"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
+function today(){return new Date().toISOString().slice(0,10)}
+function addDays(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x.toISOString().slice(0,10)}
+function esc(s){return (s||"").replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function toast(m){var t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},1700)}
+function fillVars(s,p){return (s||"").replace(/\{first\}/g,(p.name||"there").replace(/^u\//,"").split(" ")[0]).replace(/\{company\}/g,p.company||"your product").replace(/\{referrer\}/g,p.referrer||"a mutual connection")}
+function assembleMessage(p){var t=TEMPLATES[p.track];if(!t)return"";var op=t.openers[p.signalKey]||t.openers.default;return fillVars(op,p)+"\n\n"+fillVars(t.body,p)}
+function find(id){for(var i=0;i<DATA.length;i++)if(DATA[i].id===id)return DATA[i];return null}
+/* ============ STAGE MODEL ============ */
+var STAGE_LABEL={"to-send":"To send","sent":"Sent","replied":"Replied","conversation":"In conversation","call":"Call booked","proposal":"Proposal","won":"Won","lost":"Lost","nurture":"Nurture"};
+var ACTIVE_CONVO=["replied","conversation","call","proposal"];
+function markSent(id){var p=find(id);if(!p)return;p.dates=p.dates||{};if(!p.dates.sent)p.dates.sent=today();p.touchCount=(p.touchCount||0)+1;p.lastTouch=today();
+  p.touches=p.touches||[];p.touches.push({date:today(),n:p.touchCount,channel:p.platform});
+  if(p.touchCount>=5){p.status="nurture";p.nextTouch="";}else{p.status="sent";p.nextTouch=addDays(today(),CADENCE[p.touchCount]);}
+  persist();renderAll();toast("Sent \u00b7 touch "+p.touchCount+(p.nextTouch?(" \u00b7 next "+p.nextTouch):" \u00b7 nurture"));}
+function advance(id,to){var p=find(id);if(!p||!to||to===p.status)return;p.dates=p.dates||{};if(!p.dates[to])p.dates[to]=today();p.status=to;p.nextTouch="";persist();var sy=window.scrollY;renderAll();window.scrollTo(0,sy);toast("Moved to "+STAGE_LABEL[to]);}
+function dueInColdQueue(p){if(ACTIVE_CONVO.indexOf(p.status)>=0)return false;if(["won","lost","nurture"].indexOf(p.status)>=0)return false;if(p.status==="to-send")return true;if(p.status==="sent"&&p.nextTouch&&p.nextTouch<=today())return true;return false;}
+function geoOrder(p){var w=SEND_WINDOWS[p.geo]||[10,20];var h=new Date().getHours();return ((h>=w[0]&&h<=w[1])?0:1)*100+w[0];}
+function timeHint(p){var w=SEND_WINDOWS[p.geo]||[10,20];var h=new Date().getHours();if(h>=w[0]&&h<=w[1])return '<span class="timehint ok">\u25cf good time now \u00b7 '+p.geo+'</span>';return '<span class="faint" style="font-size:11px">best '+w[0]+':00\u2013'+w[1]+':00 IST \u00b7 '+p.geo+'</span>';}
+
+/* ============ SHARED HELPERS ============ */
+function uniq(a){var s=[],m={};a.forEach(function(x){if(x&&!m[x]){m[x]=1;s.push(x);}});return s;}
+function openModal(html){document.getElementById("modalInner").innerHTML=html;document.getElementById("modal").classList.add("open");}
+function calDayLabel(ds){if(ds===today())return"Today";if(ds===addDays(today(),-1))return"Yesterday";if(ds===addDays(today(),1))return"Tomorrow";var dt=new Date(ds+"T00:00:00");return dt.toLocaleDateString("default",{weekday:"short",month:"short",day:"numeric"});}
+function calGridHTML(monthDate,selectedDs,countMap,pickFn,shiftFn,bare){
+  var y=monthDate.getFullYear(),mo=monthDate.getMonth();
+  var first=new Date(y,mo,1),startDow=first.getDay(),dim=new Date(y,mo+1,0).getDate();
+  var monthName=first.toLocaleString("default",{month:"long",year:"numeric"});
+  var h=(bare?'<div>':'<div class="card">')+'<div class="row1" style="justify-content:space-between;margin-bottom:12px"><button class="btn ghost sm" onclick="'+shiftFn+'(-1)">&larr;</button><b>'+monthName+'</b><button class="btn ghost sm" onclick="'+shiftFn+'(1)">&rarr;</button></div><div class="calgrid">';
+  ["S","M","T","W","T","F","S"].forEach(function(d){h+='<div class="caldow">'+d+'</div>';});
+  for(var i=0;i<startDow;i++)h+='<div></div>';
+  for(var d=1;d<=dim;d++){
+    var ds=y+"-"+String(mo+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+    var cnt=countMap[ds]||0;
+    var cls="calday"+(ds===today()?" caltoday":"")+(ds===selectedDs?" calsel":"");
+    h+='<button class="'+cls+'" onclick="'+pickFn+'(\''+ds+'\')"><span>'+d+'</span>'+(cnt?'<em>'+cnt+'</em>':"")+'</button>';
+  }
+  return h+'</div></div>';
+}
+/* ============ TODAY'S QUEUE ============ */
+var QF={geo:"",plat:"",good:false,day:"",range:"today"};
+var qCalMonth=new Date();qCalMonth.setDate(1);
+var qCalOpen=false;
+function queueable(p){return p.status==="to-send"||p.status==="sent";}
+function queueDate(p){return p.status==="sent"?(p.nextTouch||p.lastTouch||today()):(p.nextTouch||p.createdAt||today());}
+function isGoodTime(p){var w=SEND_WINDOWS[p.geo]||[10,20];var h=new Date().getHours();return h>=w[0]&&h<=w[1];}
+function queueDateMatch(p){
+  var d=queueDate(p);
+  if(QF.range==="pick"&&QF.day)return d===QF.day;
+  if(QF.range==="today")return d===today();
+  if(QF.range==="overdue")return d<today();
+  if(QF.range==="all")return d<=today();
+  return d===today();
+}
+function qCalShift(n){qCalMonth.setMonth(qCalMonth.getMonth()+n);renderToday();}
+function qPickDay(ds){QF.day=ds;QF.range="pick";qCalOpen=false;renderToday();}
+function qSetRange(r){QF.range=r;if(r!=="pick")QF.day="";qCalOpen=false;renderToday();}
+function qDateLabel(){if(QF.range==="pick"&&QF.day)return calDayLabel(QF.day);if(QF.range==="overdue")return "Overdue";if(QF.range==="all")return "All due";return "Today";}
+function toggleQCal(){qCalOpen=!qCalOpen;renderToday();}
+function qSetGeo(v){QF.geo=v;renderToday();}
+function qSetPlat(v){QF.plat=v;renderToday();}
+function qToggleGood(){QF.good=!QF.good;renderToday();}
+function queueMatches(p){if(QF.geo&&p.geo!==QF.geo)return false;if(QF.plat&&p.platform!==QF.plat)return false;if(QF.good&&!isGoodTime(p))return false;return true;}
+function sentTodayByPlat(){var m={};DATA.forEach(function(p){(p.touches||[]).forEach(function(t){if(t.date===today())m[p.platform]=(m[p.platform]||0)+1;});});return m;}
+function renderToday(){
+  var el=document.getElementById("view-today");if(!el)return;
+  var q=DATA.filter(queueable);
+  var cmap={};q.forEach(function(p){var d=queueDate(p);cmap[d]=(cmap[d]||0)+1;});
+  var list=q.filter(function(p){return queueDateMatch(p);});
+  list=list.filter(queueMatches).sort(function(a,b){return geoOrder(a)-geoOrder(b);});
+  var geos=uniq(q.map(function(p){return p.geo;})),plats=uniq(q.map(function(p){return p.platform;}));
+  var dueAll=q.filter(function(p){return queueDate(p)<=today();});
+  var overdue=dueAll.filter(function(p){return queueDate(p)<today();}).length;
+  var todayDue=dueAll.filter(function(p){return queueDate(p)===today();}).length;
+  var followDue=dueAll.filter(function(p){return p.status==="sent"&&(p.touchCount||0)>0;}).length;
+  var freshDue=dueAll.filter(function(p){return (p.touchCount||0)===0;}).length;
+  var digest="";
+  if(QF.range==="today"&&dueAll.length){
+    var dp=[];
+    if(overdue)dp.push('<button type="button" class="rchip" style="background:rgba(255,93,108,.16);color:#ffb3ba;border-color:rgba(255,93,108,.35)" onclick="qSetRange(\'overdue\')">\u26a0 '+overdue+' overdue</button>');
+    dp.push('<span style="background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:12px">'+todayDue+' due today</span>');
+    if(followDue)dp.push('<span style="background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:5px 10px;font-size:12px">\u21bb '+followDue+' follow-up'+(followDue>1?"s":"")+' in queue</span>');
+    digest='<div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 2px 12px">'+dp.join("")+'</div>';
+  }
+  var h=digest+'<div class="filterbar">';
+  h+='<select onchange="qSetGeo(this.value)"><option value="">All regions</option>'+geos.map(function(g){return '<option'+(QF.geo===g?" selected":"")+'>'+g+'</option>';}).join("")+'</select>';
+  h+='<select onchange="qSetPlat(this.value)"><option value="">All platforms</option>'+plats.map(function(p){return '<option'+(QF.plat===p?" selected":"")+'>'+p+'</option>';}).join("")+'</select>';
+  h+='<button class="fchip'+(QF.good?" on":"")+'" onclick="qToggleGood()">\u25cf Good time now</button>';
+  h+='</div>';
+  h+='<div class="rangechips" style="margin:0 2px 12px"><button class="rchip'+(QF.range==="today"?" on":"")+'" onclick="qSetRange(\'today\')">Today</button><button class="rchip'+(QF.range==="overdue"?" on":"")+'" onclick="qSetRange(\'overdue\')">Overdue'+(overdue?' ('+overdue+')':'')+'</button><button class="rchip'+(QF.range==="all"?" on":"")+'" onclick="qSetRange(\'all\')">All due</button><button class="rchip'+(QF.range==="pick"||qCalOpen?" on":"")+'" onclick="toggleQCal()">\uD83D\uDCC5 '+(QF.range==="pick"&&QF.day?calDayLabel(QF.day):"Pick date")+'</button></div>';
+  if(qCalOpen){h+='<div class="calpop-bd" onclick="toggleQCal()"></div><div class="calpop"><div class="row1" style="justify-content:space-between;margin-bottom:8px"><b style="font-size:13px">Filter by day</b><button class="btn ghost sm" onclick="toggleQCal()">\u2715</button></div>'+calGridHTML(qCalMonth,QF.range==="pick"?QF.day:"",cmap,"qPickDay","qCalShift",true)+'</div>';}
+  var st=sentTodayByPlat();
+  h+='<div class="capsbar">'+PLATFORMS.map(function(pl){var c=st[pl]||0,cap=SAFE_CAPS[pl];return '<span class="capchip'+(c>=cap?" over":"")+'">'+pl+' '+c+'/'+cap+'</span>';}).join("")+'</div>';
+  h+='<h2 class="sec">'+qDateLabel()+' \u00b7 '+list.length+' to send</h2>';
+  if(!list.length)h+='<div class="empty"><div class="big">Nothing here</div>'+((QF.geo||QF.plat||QF.good||QF.range!=="today")?"Clear the filters, or ":"")+'go to <b>Find leads</b> to source prospects, or tap +.</div>';
+  list.forEach(function(p){h+=queueCard(p);});
+  el.innerHTML=h;
+}
+function msgArea(p){return '<textarea class="msg" id="msg-'+p.id+'" oninput="saveMsg(\''+p.id+'\')">'+esc(p.message||assembleMessage(p))+'</textarea>';}
+function queueCard(p){var t=p.touchCount||0,overdue=queueDate(p)<today();
+  return '<div class="pcard"><div class="row1"><span class="nm">'+esc(p.name)+'</span><span class="badge b-'+p.track+'">'+TRACKS[p.track]+'</span><span class="chip">'+esc(p.platform)+'</span><span class="chip">'+esc(p.geo)+'</span>'+(t>0?'<span class="chip">touch '+(t+1)+'</span>':'')+(overdue?'<span class="chip" style="background:rgba(247,183,51,.16);border-color:rgba(247,183,51,.4);color:#c08416">overdue \u00b7 '+queueDate(p)+'</span>':'')+'</div>'
+    +'<div class="sig">'+timeHint(p)+'<br><b>Signal:</b> '+esc(p.signal||"\u2014")+'</div>'+msgArea(p)
+    +'<div class="hint">Yellow [bracket] = your one custom line. Tweak it, then copy.</div>'
+    +'<div class="cardbtns"><button class="btn primary" onclick="copyMsg(\''+p.id+'\')">Copy message</button>'
+    +(p.profile?'<button class="btn" onclick="openProfile(\''+p.id+'\')">Open profile \u2197</button>':'')
+    +'<button class="btn ai" onclick="aiAnalyse(\''+p.id+'\')">\u2728 AI analyse</button>'
+    +(p.aiBrief?'<button class="btn sm" onclick="viewAiBrief(\''+p.id+'\')">Brief</button>':"")
+    +'<button class="btn good" onclick="markSent(\''+p.id+'\')">Mark sent</button>'
+    +'<button class="btn ghost sm" onclick="editProspect(\''+p.id+'\')">Edit</button></div></div>';
+}
+var AI_LAST={};
+function aiAnalyse(id){var p=find(id);if(!p)return;
+  var saved=p.aiBrief?'<div class="hint" style="margin-top:8px;padding:8px 10px;background:var(--card2);border-radius:10px;border:1px solid var(--line)">Saved brief from <b>'+esc(p.aiBrief.at||"?")+'</b> \u2014 <button class="btn ghost sm" style="padding:2px 8px" onclick="viewAiBrief(\''+id+'\')">read it</button> or run fresh analysis below.</div>':"";
+  openModal('<div class="row1" style="justify-content:space-between"><b style="font-size:16px">\u2728 AI analyse \u2014 '+esc(p.name)+'</b><button class="btn ghost" onclick="closeModal()">\u2715</button></div>'
+    +saved
+    +'<div class="muted" style="font-size:12px;margin-top:8px">Builds a <b>conversation brief</b> (who they are, what they care about, how to continue if they reply) <b>and</b> a consultative opening message. Sources: Apify LinkedIn profile+posts, company site, Perplexity web research.</div>'
+    +'<div class="hint" style="margin-top:6px">Tick <b>Pull LinkedIn posts</b> for their recent activity. Apollo leads skip the profile scrape automatically (posts only). Paste anything extra below.</div>'
+    +'<textarea id="ai-ctx" class="msg" style="margin-top:8px;min-height:60px" placeholder="Optional but powerful: paste their LinkedIn About / headline / a recent post (or anything you noticed)"></textarea>'
+    +'<label class="gchk" style="margin-top:8px"><input type="checkbox" id="ai-deep"> Deep research <span class="faint" style="font-size:11px">(reads many more sources \u2014 Google/news/YouTube \u2014 slower, ~30-60s)</span></label>'
+    +((p.profile&&/linkedin\.com\/in\//i.test(p.profile))?'<label class="gchk" style="margin-top:8px"><input type="checkbox" id="ai-profile"> Pull LinkedIn posts (Apify) <span class="faint" style="font-size:11px">(recent posts only if Apollo has company data \u00b7 ~10\u201330s)</span></label>':'<div class="hint" style="margin-top:8px;border-left:3px solid var(--line);padding-left:8px">No LinkedIn <b>/in/</b> URL on this prospect, so Apify post-scraping is unavailable. Add their LinkedIn profile URL (Edit prospect) to enable it \u2014 web research still runs.</div>')
+    +'<div class="src-btns" style="margin-top:8px"><button class="btn sm" onclick="runAiAnalyse(\''+id+'\')">Analyse with this context</button></div>'
+    +'<div id="ai-body" class="muted" style="font-size:13px;line-height:1.65;margin-top:14px"><span class="spin"></span> Researching '+esc(p.company||p.name)+'\u2026</div>');
+  runAiAnalyse(id);
+}
+function runAiAnalyse(id){var p=find(id);if(!p)return;
+  var deepEl=document.getElementById("ai-deep");var deep=!!(deepEl&&deepEl.checked);
+  var profEl=document.getElementById("ai-profile");var pullProfile=!!(profEl&&profEl.checked);
+  var ctxEl=document.getElementById("ai-ctx");var extra=ctxEl?ctxEl.value.trim():"";
+  var openerKeys=(TEMPLATES[p.track]&&TEMPLATES[p.track].openers)?Object.keys(TEMPLATES[p.track].openers):["default"];
+  var b=document.getElementById("ai-body");
+  if(b)b.innerHTML='<div id="agent-trace-live"><div class="trace-step running">Planning tools\u2026</div></div><div id="ai-result-pending" class="muted" style="font-size:13px;margin-top:12px">Agent running \u2014 '+esc(p.company||p.name)+'</div>';
+  var payload={prospect:{id:p.id,name:p.name,company:p.company,domain:p.domain,orgId:p.orgId,website:p.website,track:p.track,geo:p.geo,platform:p.platform,signal:p.signal,notes:p.notes,profile:p.profile,companyFacts:p.companyFacts,hiringTitles:p.hiringTitles,allRoles:p.allRoles},openerKeys:openerKeys,extraContext:extra,deep:deep,pullProfile:pullProfile};
+  function traceEl(){return document.getElementById("agent-trace-live");}
+  function appendTrace(html){var el=traceEl();if(!el)return;el.insertAdjacentHTML("beforeend",html);}
+  function markRunning(label){appendTrace('<div class="trace-step running">'+esc(label)+'</div>');}
+  function markLastDone(label,extra){var el=traceEl();if(!el)return;var steps=el.querySelectorAll(".trace-step.running");if(steps.length){var s=steps[steps.length-1];s.className="trace-step done";s.textContent=(extra?label+" \u00b7 "+extra:label);}else appendTrace('<div class="trace-step done">'+esc(label+(extra?" \u00b7 "+extra:""))+'</div>');}
+  function markLastFail(label){var el=traceEl();if(!el)return;var steps=el.querySelectorAll(".trace-step.running");if(steps.length){steps[steps.length-1].className="trace-step fail";steps[steps.length-1].textContent=label;}else appendTrace('<div class="trace-step fail">'+esc(label)+'</div>');}
+  fetch("/api/agent/analyse-stream",{method:"POST",headers:{"Content-Type":"application/json",Accept:"text/event-stream"},body:JSON.stringify(payload)})
+   .then(function(r){
+     var ct=(r.headers.get("content-type")||"").toLowerCase();
+     if(ct.indexOf("text/event-stream")<0){
+       return r.json().then(function(j){
+         AI_LAST[id]=j;var pr=find(id);if(pr){if(!pr.companyFacts&&j.companyFacts)pr.companyFacts=j.companyFacts;if((!pr.hiringTitles||!pr.hiringTitles.length)&&j.hiringTitles&&j.hiringTitles.length)pr.hiringTitles=j.hiringTitles;if((!pr.allRoles||!pr.allRoles.length)&&j.allRoles&&j.allRoles.length)pr.allRoles=j.allRoles;persist();renderPipeline();renderToday();}
+         renderAiResult(id,j,openerKeys);
+       });
+     }
+     if(!r.body||!r.body.getReader){throw new Error("Streaming not supported");}
+     var reader=r.body.getReader();var dec=new TextDecoder();var buf="";
+     function pump(){
+       return reader.read().then(function(chunk){
+         if(chunk.done)return;
+         buf+=dec.decode(chunk.value,{stream:true});
+         var parts=buf.split("\n\n");buf=parts.pop()||"";
+         parts.forEach(function(block){
+           block.split("\n").forEach(function(line){
+             if(line.indexOf("data: ")!==0)return;
+             var raw=line.slice(6).trim();
+             if(raw==="[DONE]")return;
+             try{var ev=JSON.parse(raw);handleEvent(ev);}catch(e){}
+           });
+         });
+         return pump();
+       });
+     }
+     function handleEvent(ev){
+       if(!ev||!ev.type)return;
+       if(ev.type==="plan"){
+         var el=traceEl();if(el)el.innerHTML="";
+         (ev.tools||[]).forEach(function(t){appendTrace('<div class="trace-step pending">'+esc(t.name||"?")+(t.reason?" \u2014 "+esc(t.reason):"")+'</div>');});
+         if(ev.reasoning)appendTrace('<div class="faint" style="margin-top:6px;font-size:11px">'+esc(ev.reasoning)+'</div>');
+         markRunning("Executing planned tools\u2026");
+       }else if(ev.type==="tool"){
+         markLastDone(ev.name||"tool",(ev.duration_ms?ev.duration_ms+"ms":"")+(ev.error?" error":""));
+         if(ev.error)markLastFail(ev.name+": "+ev.error);
+       }else if(ev.type==="synthesize"){
+         markRunning("Synthesizing brief\u2026");
+         markLastDone("Brief synthesized");
+       }else if(ev.type==="validate"){
+         markLastDone("Validation",(ev.score!=null?ev.score+"/100 "+(ev.pass?"pass":"fail"):""));
+       }else if(ev.type==="retry"){
+         appendTrace('<div class="trace-step running">Retrying draft (attempt '+ev.attempt+')\u2026</div>');
+       }else if(ev.type==="persist"){
+         markLastDone("Saved to CRM");
+       }else if(ev.type==="final"){
+         var j=ev;AI_LAST[id]=j;var pr=find(id);if(pr){if(!pr.companyFacts&&j.companyFacts)pr.companyFacts=j.companyFacts;if((!pr.hiringTitles||!pr.hiringTitles.length)&&j.hiringTitles&&j.hiringTitles.length)pr.hiringTitles=j.hiringTitles;if((!pr.allRoles||!pr.allRoles.length)&&j.allRoles&&j.allRoles.length)pr.allRoles=j.allRoles;persist();renderPipeline();renderToday();}
+         renderAiResult(id,j,openerKeys);
+       }else if(ev.type==="error"){
+         markLastFail(ev.message||"Agent error");
+       }
+     }
+     return pump();
+   })
+   .catch(function(){var b2=document.getElementById("ai-body");if(b2)b2.innerHTML='Could not reach /api/agent/analyse-stream \u2014 is the server and agent running?';});
+}
+function aiBar(score){var c=score>=70?"#1faf63":score>=45?"#d99419":"#e05566";return '<div style="height:8px;border-radius:6px;background:var(--card2);border:1px solid var(--line);overflow:hidden;margin:6px 0"><div style="height:100%;width:'+score+'%;background:'+c+'"></div></div>';}
+function renderAiResult(id,j,openerKeys){
+  var b=document.getElementById("ai-body");if(!b)return;
+  if(j.error){b.innerHTML=esc(j.error);return;}
+  var modeLabel=j.mode==="agent"?"langgraph agent \u00b7 tool-calling":j.mode==="perplexity-deep"?"perplexity \u00b7 deep research":j.mode==="perplexity"?"perplexity \u00b7 live web research":(j.mode||"ai");
+  var modeTag=j.mode==="heuristic"?'<span class="chip" style="opacity:.7">heuristic \u00b7 add PERPLEXITY_API_KEY for deep web research</span>':'<span class="chip" style="color:var(--good)">'+esc(modeLabel)+'</span>';
+  var creditTag=j.credits_consumed?'<span class="chip" style="opacity:.7">'+j.credits_consumed+' Apollo credit'+(j.credits_consumed>1?"s":"")+'</span>':(j.factsFromStore?'<span class="chip" style="opacity:.7">company facts reused \u00b7 0 credits</span>':'');
+  var srcTag=(j.usedProfile?'<span class="chip" style="color:var(--good)">profile read</span>':'')+(j.apifySkippedProfile?'<span class="chip" style="opacity:.7">profile skipped (Apollo)</span>':'')+(j.usedPosts?'<span class="chip" style="color:var(--good)">'+((j.linkedInData&&j.linkedInData.postCount)||"?")+' posts</span>':'')+(j.usedWebsite?'<span class="chip" style="opacity:.7">website read</span>':'')+(j.usedPaste?'<span class="chip" style="opacity:.7">notes pasted</span>':'')+((j.sources&&j.sources.length)?'<span class="chip" style="opacity:.7">'+j.sources.length+' sources</span>':'');
+  var list=function(label,items){if(!items||!items.length)return "";return '<div style="margin-top:12px"><b style="color:var(--mut)">'+label+'</b><ul style="margin:4px 0 0 18px;padding:0">'+items.map(function(n){return '<li>'+esc(n)+'</li>';}).join("")+'</ul></div>';};
+  var pb=j.conversationPlaybook||{};
+  var playbook="";
+  if(pb.whatTheyCareAbout||pb.ifTheyReply||pb.watchOut){
+    playbook='<div style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px"><b style="color:var(--brand2)">Conversation playbook</b> <span class="faint" style="font-size:11px">(keep this — use when they reply)</span>'
+      +(pb.whatTheyCareAbout?'<div style="margin-top:10px"><b style="color:var(--mut)">What they care about</b><br>'+esc(pb.whatTheyCareAbout)+'</div>':"")
+      +list("Recent signals",j.recentSignals)
+      +list("Key facts to remember",j.keyFacts)
+      +list("Listen for",pb.listenFor)
+      +list("Good follow-up questions",pb.goodFollowUpQuestions)
+      +(pb.ifTheyReply?'<div style="margin-top:10px"><b style="color:var(--mut)">If they reply</b><br>'+esc(pb.ifTheyReply)+'</div>':"")
+      +(pb.watchOut?'<div style="margin-top:10px"><b style="color:var(--mut)">Watch out</b><br>'+esc(pb.watchOut)+'</div>':"")
+      +'</div>';
+  }
+  if(j.linkedInData&&j.linkedInData.recentPosts&&j.linkedInData.recentPosts.length){
+    playbook+=list("Scraped LinkedIn posts",j.linkedInData.recentPosts);
+  }
+  var traceBlock="";
+  if(j.tool_trace&&j.tool_trace.length){
+    traceBlock='<details style="margin-top:12px"><summary class="faint" style="font-size:12px;cursor:pointer">Agent trace ('+j.tool_trace.length+' tools)</summary><ul style="margin:6px 0 0 18px;font-size:11.5px">'+j.tool_trace.map(function(t){return '<li>'+esc(t.tool||"?")+(t.duration_ms?' \u00b7 '+t.duration_ms+'ms':'')+(t.error?' \u00b7 <span style="color:#ffa3ac">'+esc(t.error)+'</span>':'')+'</li>';}).join("")+'</ul></details>';
+  }
+  if(j.validation&&j.validation.score!=null){
+    traceBlock+='<div class="faint" style="font-size:11px;margin-top:6px">Validation: '+j.validation.score+'/100 '+(j.validation.pass?'\u2713 pass':'\u2717 retry')+'</div>';
+  }
+  var sourcesBlock="";
+  if(j.sources&&j.sources.length){sourcesBlock='<div style="margin-top:12px"><b style="color:var(--mut)">Sources</b><div style="margin-top:5px;display:flex;flex-direction:column;gap:3px">'+j.sources.map(function(u){var label=String(u).replace(/^https?:\/\//,"").replace(/\/$/,"");if(label.length>60)label=label.slice(0,60)+"\u2026";return '<a href="'+esc(u)+'" target="_blank" rel="noopener" style="font-size:11.5px">\u2197 '+esc(label)+'</a>';}).join("")+'</div></div>';}
+  var keyOpts=openerKeys.map(function(k){return '<option value="'+k+'"'+(k===j.signalKey?' selected':'')+'>'+k+'</option>';}).join("");
+  var sc=j.fit?j.fit.score:0;
+  var sec=function(label,val){return val?'<div style="margin-top:12px"><b style="color:var(--mut)">'+label+'</b><br>'+esc(val)+'</div>':"";};
+  var needs="";
+  if(j.needs&&j.needs.length){needs='<div style="margin-top:12px"><b style="color:var(--mut)">Likely needs</b><ul style="margin:4px 0 0 18px;padding:0">'+j.needs.map(function(n){return '<li>'+esc(n)+'</li>';}).join("")+'</ul></div>';}
+  var draft=j.draftMessage||"";
+  var h=''
+    +'<div class="row1" style="gap:8px;align-items:center;flex-wrap:wrap">'+modeTag+creditTag+srcTag+(j.warning?'<span class="chip" style="color:#ffa3ac">'+esc(j.warning)+'</span>':'')+(j.note?'<span class="faint" style="font-size:11px">'+esc(j.note)+'</span>':'')+'<span class="faint" style="font-size:11px">auto-saved on prospect</span></div>'
+    +'<div style="margin-top:12px;color:var(--txt)"><b>Fit: '+sc+'/100 \u00b7 '+esc(j.fit?j.fit.label:"")+'</b></div>'+aiBar(sc)
+    +sec("Who they are",j.person)
+    +sec("Company",j.company)
+    +needs
+    +sec("Where we fit",j.fit?j.fit.whereWeFit:"")
+    +sec("Why now",j.fit?j.fit.whyNow:"")
+    +sec("Angle",j.angle)
+    +playbook
+    +traceBlock
+    +sourcesBlock
+    +(j.summary?'<div class="hint" style="margin-top:12px">'+esc(j.summary)+'</div>':'')
+    +'<div style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px"><b style="color:var(--good)">Opening message</b> <span class="faint" style="font-size:11px">(consultative — review, then send)</span>'
+    +'<textarea id="ai-draft" class="msg" style="margin-top:6px;min-height:150px">'+esc(draft)+'</textarea>'
+    +'<div class="cardbtns" style="margin-top:8px"><button class="btn primary" onclick="applyAiMessage(\''+id+'\')">Use message + save brief</button><button class="btn" onclick="saveAiBriefOnly(\''+id+'\')">Save brief only</button><button class="btn" onclick="copyAiDraft()">Copy message</button></div>'
+    +'<div style="margin-top:12px;border-top:1px dashed var(--line);padding-top:10px"><b style="color:var(--mut);font-size:12px">Revise draft (agent chat)</b>'
+    +'<div class="row1" style="margin-top:6px;gap:6px"><input id="ai-chat-in" placeholder="e.g. make it shorter, reference their Series A" style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--txt)"><button class="btn sm" onclick="reviseAiDraft(\''+id+'\')">Revise</button></div></div></div>'
+    +'<details style="margin-top:14px"><summary class="faint" style="font-size:12px;cursor:pointer">Or apply via template (opener + custom line)</summary>'
+    +'<div style="margin-top:10px"><b style="color:var(--mut)">Opener</b><br><select id="ai-key" style="margin-top:4px">'+keyOpts+'</select></div>'
+    +'<div style="margin-top:12px"><b style="color:var(--mut)">Custom line</b><textarea id="ai-line" class="msg" style="margin-top:4px">'+esc(j.customLine||"")+'</textarea></div>'
+    +'<div class="cardbtns" style="margin-top:10px"><button class="btn" onclick="applyAi(\''+id+'\')">Apply template</button></div></details>'
+    +'<div class="cardbtns" style="margin-top:16px"><button class="btn ghost" onclick="closeModal()">Close</button></div>';
+  b.innerHTML=h;
+}
+function copyAiDraft(){var d=document.getElementById("ai-draft");if(!d)return;navigator.clipboard.writeText(d.value).then(function(){toast("Copied")},function(){toast("Copy failed")});}
+function reviseAiDraft(id){var p=find(id);if(!p)return;var inp=document.getElementById("ai-chat-in");var msg=inp?inp.value.trim():"";if(!msg){toast("Type a revision request");return;}
+  toast("Revising\u2026");
+  fetch("/api/agent/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prospect_id:id,message:msg,prospect:p,openerKeys:(TEMPLATES[p.track]&&TEMPLATES[p.track].openers)?Object.keys(TEMPLATES[p.track].openers):["default"]})})
+   .then(function(r){return r.json();})
+   .then(function(j){if(j.error){toast(j.error);return;}
+     var d=document.getElementById("ai-draft");if(d&&j.draftMessage)d.value=j.draftMessage;
+     if(j.updated_brief){AI_LAST[id]=Object.assign(AI_LAST[id]||{},j.updated_brief,{draftMessage:j.draftMessage,mode:"agent",tool_trace:j.tool_trace||[]});}
+     toast("Draft revised");if(inp)inp.value="";})
+   .catch(function(){toast("Agent chat unavailable");});}
+function aiBriefFromResult(j){return {at:today(),mode:j.mode||"",person:j.person||"",company:j.company||"",needs:j.needs||[],recentSignals:j.recentSignals||[],keyFacts:j.keyFacts||[],conversationPlaybook:j.conversationPlaybook||null,fit:j.fit||null,angle:j.angle||"",summary:j.summary||"",draftMessage:j.draftMessage||"",linkedInPosts:(j.linkedInData&&j.linkedInData.recentPosts)||[]};}
+function saveAiBriefOnly(id){var p=find(id);var j=AI_LAST[id];if(!p||!j)return;p.aiBrief=aiBriefFromResult(j);persist();toast("Brief saved on "+p.name);}
+function applyAiMessage(id){var p=find(id);if(!p)return;var d=document.getElementById("ai-draft");if(!d)return;
+  p.message=d.value;var j=AI_LAST[id];if(j)p.aiBrief=aiBriefFromResult(j);
+  var keyEl=document.getElementById("ai-key");if(keyEl&&TEMPLATES[p.track]&&TEMPLATES[p.track].openers[keyEl.value])p.signalKey=keyEl.value;
+  persist();renderAll();closeModal();toast("Message + brief saved");}
+function viewAiBrief(id){var p=find(id);if(!p||!p.aiBrief)return toast("No brief saved");var b=p.aiBrief;
+  var list=function(label,items){if(!items||!items.length)return "";return '<div style="margin-top:10px"><b style="color:var(--mut)">'+label+'</b><ul style="margin:4px 0 0 18px">'+items.map(function(n){return '<li>'+esc(n)+'</li>';}).join("")+'</ul></div>';};
+  var pb=b.conversationPlaybook||{};
+  openModal('<div class="row1" style="justify-content:space-between"><b>Saved brief \u2014 '+esc(p.name)+'</b><button class="btn ghost" onclick="closeModal()">\u2715</button></div>'
+    +'<div class="faint" style="font-size:11px;margin-top:6px">Saved '+esc(b.at||"?")+' \u00b7 '+esc(b.mode||"")+'</div>'
+    +(b.summary?'<div class="hint" style="margin-top:10px">'+esc(b.summary)+'</div>':"")
+    +(b.person?'<div style="margin-top:12px"><b style="color:var(--mut)">Who they are</b><br>'+esc(b.person)+'</div>':"")
+    +(b.company?'<div style="margin-top:12px"><b style="color:var(--mut)">Company</b><br>'+esc(b.company)+'</div>':"")
+    +list("Likely needs",b.needs)
+    +list("Recent signals",b.recentSignals)
+    +list("Key facts",b.keyFacts)
+    +(pb.whatTheyCareAbout?'<div style="margin-top:12px"><b style="color:var(--mut)">What they care about</b><br>'+esc(pb.whatTheyCareAbout)+'</div>':"")
+    +list("Listen for",pb.listenFor)
+    +list("Follow-up questions",pb.goodFollowUpQuestions)
+    +(pb.ifTheyReply?'<div style="margin-top:12px"><b style="color:var(--mut)">If they reply</b><br>'+esc(pb.ifTheyReply)+'</div>':"")
+    +(pb.watchOut?'<div style="margin-top:12px"><b style="color:var(--mut)">Watch out</b><br>'+esc(pb.watchOut)+'</div>':"")
+    +list("LinkedIn posts",b.linkedInPosts)
+    +(b.draftMessage?'<div style="margin-top:14px;border-top:1px solid var(--line);padding-top:12px"><b style="color:var(--mut)">Opening message used</b><div class="msg" style="margin-top:6px;min-height:80px;white-space:pre-wrap">'+esc(b.draftMessage)+'</div></div>':"")
+    +'<div class="cardbtns" style="margin-top:14px"><button class="btn ai sm" onclick="closeModal();aiAnalyse(\''+p.id+'\')">Re-run analysis</button><button class="btn ghost" onclick="closeModal()">Close</button></div>');}
+function applyAi(id){var p=find(id);if(!p)return;
+  var keyEl=document.getElementById("ai-key"),lineEl=document.getElementById("ai-line");
+  var key=keyEl?keyEl.value:p.signalKey,line=lineEl?lineEl.value.trim():"";
+  if(TEMPLATES[p.track]&&TEMPLATES[p.track].openers[key])p.signalKey=key;
+  var msg=assembleMessage(p);
+  if(line)msg=msg.replace(/\[\[custom:.*?\]\]/,"[[custom: "+line+"]]");
+  p.message=msg;persist();renderAll();closeModal();toast("Applied \u2014 opener + custom line updated");
+}
+function saveMsg(id){var p=find(id);if(!p)return;p.message=document.getElementById("msg-"+id).value;persist();}
+function copyMsg(id){var v=document.getElementById("msg-"+id).value.replace(/\[\[custom:(.*?)\]\]/g,"$1");navigator.clipboard.writeText(v).then(function(){toast("Copied \u2014 paste & send")},function(){toast("Copy failed")});}
+function openProfile(id){var p=find(id);if(p&&p.profile)window.open(p.profile,"_blank")}
+/* ============ CONVERSATIONS ============ */
+var CF={day:"",status:"all",q:""};
+var cCalMonth=new Date();cCalMonth.setDate(1);
+var cCalOpen=false;
+var STAGE_SET=["replied","conversation","call","proposal","won","lost","nurture"];
+// Stage chips shown in Conversations, in pipeline order. "all" is always shown.
+var CONV_STAGES=[["all","All"],["sent","Awaiting reply"],["replied","Replied"],["conversation","In conversation"],["call","Call booked"],["proposal","Proposal"],["won","Won"],["lost","Lost"],["nurture","Nurture"]];
+function contacted(p){return p.status!=="to-send"||(p.touches&&p.touches.length>0);}
+function convMatchesSearch(p,q){if(!q)return true;var hay=((p.name||"")+" "+(p.company||"")+" "+(p.signal||"")+" "+(p.notes||"")).toLowerCase();return hay.indexOf(q)>=0;}
+function cSetSearch(v){CF.q=v;renderPipeline();}
+function cClearSearch(){CF.q="";renderPipeline();}
+function cCalShift(n){cCalMonth.setMonth(cCalMonth.getMonth()+n);renderPipeline();}
+function cPickDay(ds){CF.day=ds;CF.status="all";cCalOpen=false;cCalMonth=new Date(ds+"T00:00:00");cCalMonth.setDate(1);renderPipeline();}
+function cToday(){cPickDay(today());}
+function toggleCCal(){cCalOpen=!cCalOpen;renderPipeline();}
+function cSetStatus(s){CF.status=s;renderPipeline();}
+function sentDayMap(){var m={};DATA.forEach(function(p){(p.touches||[]).forEach(function(t){(m[t.date]=m[t.date]||{})[p.id]=true;});});var c={};Object.keys(m).forEach(function(d){c[d]=Object.keys(m[d]).length;});return c;}
+function renderPipeline(){
+  var el=document.getElementById("view-pipeline");if(!el)return;
+  var q=(CF.q||"").trim().toLowerCase();
+  var searching=!!q;
+  var base,list,counts,stageLabel={};
+  CONV_STAGES.forEach(function(c){stageLabel[c[0]]=c[1];});
+  if(searching){
+    base=DATA.filter(contacted).filter(function(p){return convMatchesSearch(p,q);});
+    counts={all:base.length};
+    base.forEach(function(p){counts[p.status]=(counts[p.status]||0)+1;});
+    list=(CF.status==="all")?base.slice():base.filter(function(p){return p.status===CF.status;});
+    list.sort(function(a,b){return (a.name||"").localeCompare(b.name||"");});
+  }else{
+    if(!CF.day)CF.day=today();
+    var ids={};DATA.forEach(function(p){(p.touches||[]).forEach(function(t){if(t.date===CF.day)ids[p.id]=true;});});
+    base=DATA.filter(function(p){return ids[p.id];});
+    counts={all:base.length};
+    base.forEach(function(p){counts[p.status]=(counts[p.status]||0)+1;});
+    list=(CF.status==="all")?base.slice():base.filter(function(p){return p.status===CF.status;});
+    list.sort(function(a,b){return (b.lastTouch||"")<(a.lastTouch||"")?-1:((b.lastTouch||"")>(a.lastTouch||"")?1:0);});
+  }
+  var h='<div class="filterbar" style="width:100%">';
+  h+='<input id="c-search" type="search" class="searchin" placeholder="Search all prospects by name, company\u2026" value="'+esc(CF.q||"")+'" oninput="cSetSearch(this.value)">';
+  if(searching)h+='<button class="fchip on" onclick="cClearSearch()">\u2715 Clear</button>';
+  h+='</div><div class="filterbar">';
+  if(!searching){
+    h+='<button class="fchip on" onclick="toggleCCal()">\uD83D\uDCC5 '+calDayLabel(CF.day)+'</button>';
+    if(CF.day!==today())h+='<button class="fchip" onclick="cToday()">Today</button>';
+  }
+  CONV_STAGES.forEach(function(c){if(c[0]!=="all"&&!counts[c[0]])return;h+='<button class="fchip'+(CF.status===c[0]?" on":"")+'" onclick="cSetStatus(\''+c[0]+'\')">'+c[1]+' '+(counts[c[0]]||0)+'</button>';});
+  h+='</div>';
+  if(!searching&&cCalOpen){h+='<div class="calpop-bd" onclick="toggleCCal()"></div><div class="calpop"><div class="row1" style="justify-content:space-between;margin-bottom:8px"><b style="font-size:13px">Sent on a day</b><button class="btn ghost sm" onclick="toggleCCal()">\u2715</button></div>'+calGridHTML(cCalMonth,CF.day,sentDayMap(),"cPickDay","cCalShift",true)+'<div class="rangechips" style="margin:12px 0 0"><button class="rchip'+(CF.day===today()?" on":"")+'" onclick="cToday()">Jump to today</button></div></div>';}
+  var title=searching?('Search \u00b7 "'+esc(CF.q)+'"'):("Sent "+calDayLabel(CF.day)+(CF.status==="all"?"":(" \u00b7 "+stageLabel[CF.status])));
+  h+='<h2 class="sec">'+title+' \u00b7 '+list.length+(searching?" across all days":"")+'</h2>';
+  if(!list.length)h+='<div class="empty muted">'+(searching?("No prospects match \""+esc(CF.q)+"\" \u2014 try another name or company."):(counts.all?("No one at this stage on "+calDayLabel(CF.day)+" \u2014 try another chip."):("Nothing sent on "+calDayLabel(CF.day)+". Pick another day from \uD83D\uDCC5 or send from the Queue.")))+'</div>';
+  list.forEach(function(p){h+=convCard(p,searching);});
+  el.innerHTML=h;
+}
+function convCard(p,searching){
+  var stages=STAGE_SET.slice();
+  if(stages.indexOf(p.status)<0)stages.unshift(p.status);
+  var opts=stages.map(function(s){return '<option value="'+s+'"'+(s===p.status?' selected':'')+'>'+(STAGE_LABEL[s]||s)+'</option>';}).join("");
+  var briefBtn=p.aiBrief?'<button class="btn sm" onclick="viewAiBrief(\''+p.id+'\')">Brief'+(p.aiBrief.at?' \u00b7 '+esc(p.aiBrief.at):'')+'</button>':"";
+  return '<div class="pcard"><div class="row1"><span class="nm">'+esc(p.name)+'</span>'+(p.company?'<span class="chip">'+esc(p.company)+'</span>':"")+'<span class="badge b-'+p.track+'">'+TRACKS[p.track]+'</span><span class="chip">'+esc(p.platform)+'</span><span class="chip">'+esc(p.geo)+'</span><span class="chip" style="color:var(--good)">'+(STAGE_LABEL[p.status]||p.status)+'</span>'+(searching&&p.lastTouch?'<span class="chip">sent '+esc(p.lastTouch)+'</span>':"")+'</div>'
+    +'<div class="sig"><b>Signal:</b> '+esc(p.signal||"\u2014")+(p.notes?'<br><b>Notes:</b> '+esc(p.notes):'')+'</div>'
+    +'<div class="muted" style="font-size:11px;margin-top:6px">Last sent '+(p.lastTouch||"\u2014")+' \u00b7 touch '+(p.touchCount||0)+(p.aiBrief&&p.aiBrief.at?' \u00b7 brief '+esc(p.aiBrief.at):"")+'</div>'
+    +'<div class="cardbtns">'
+    +(p.profile?'<button class="btn sm" onclick="openProfile(\''+p.id+'\')">Profile \u2197</button>':"")
+    +'<button class="btn sm ai" onclick="aiAnalyse(\''+p.id+'\')">\u2728 '+(p.aiBrief?"Re-analyse":"Analyse")+'</button>'
+    +briefBtn
+    +'<label class="selwrap">Stage <select onchange="advance(\''+p.id+'\',this.value)">'+opts+'</select></label>'
+    +'<button class="btn ghost sm" onclick="editProspect(\''+p.id+'\')">Edit</button>'
+    +'</div></div>';
+}
+/* ============ ANALYTICS ============ */
+function segStats(list){function R(s){return list.filter(function(p){return p.dates&&p.dates[s]}).length}
+  var sent=R("sent"),rep=R("replied"),call=R("call"),prop=R("proposal"),won=R("won");
+  return {n:list.length,sent:sent,rep:rep,call:call,prop:prop,won:won,rr:sent?rep/sent:0,wr:sent?won/sent:0};}
+function pct(x){return (x*100).toFixed(0)+"%"}
+function leaderboard(title,keyfn){
+  var g={};DATA.forEach(function(p){var k=keyfn(p);if(!k)return;(g[k]=g[k]||[]).push(p)});
+  var avg=segStats(DATA).rr||0;
+  var rows=Object.keys(g).map(function(k){return {k:k,s:segStats(g[k])}}).sort(function(a,b){return b.s.rr-a.s.rr});
+  var h='<div class="card"><div class="row1" style="margin-bottom:8px"><b>'+title+'</b><span class="faint">reply-rate ranked</span></div><div class="tblwrap"><table><tr><th>Segment</th><th>Sent</th><th>Reply</th><th>Calls</th><th>Won</th><th>Verdict</th></tr>';
+  rows.forEach(function(r){var tag,cls;if(r.s.sent<20){tag="NEED DATA";cls="data"}else if(avg>0&&r.s.rr>=avg*1.2){tag="SCALE";cls="scale"}else if(r.s.rr<=avg*0.5){tag="FIX / KILL";cls="kill"}else{tag="KEEP";cls="watch"}
+    h+='<tr><td>'+esc(r.k)+'</td><td>'+r.s.sent+'</td><td>'+r.s.rep+' ('+pct(r.s.rr)+')</td><td>'+r.s.call+'</td><td>'+r.s.won+'</td><td><span class="tag '+cls+'">'+tag+'</span></td></tr>';});
+  if(!rows.length)h+='<tr><td colspan="6" class="faint">No data yet</td></tr>';
+  return h+'</table></div></div>';
+}
+function renderAnalytics(){
+  var el=document.getElementById("view-analytics");var all=segStats(DATA);
+  var h='<h2 class="sec">This month at a glance</h2><div class="grid">'+stat(all.sent,"Touches sent")+stat(all.rep,"Replies ("+pct(all.rr)+")")+stat(all.call,"Calls")+stat(all.prop,"Proposals")+stat(all.won,"Won")+'</div>';
+  h+='<h2 class="sec">Funnel by track</h2><div class="card tblwrap"><table><tr><th>Track</th><th>Sent</th><th>Replied</th><th>Call</th><th>Proposal</th><th>Won</th></tr>';
+  Object.keys(TRACKS).forEach(function(t){var s=segStats(DATA.filter(function(p){return p.track===t}));h+='<tr><td><span class="badge b-'+t+'">'+TRACKS[t]+'</span></td><td>'+s.sent+'</td><td>'+s.rep+'</td><td>'+s.call+'</td><td>'+s.prop+'</td><td>'+s.won+'</td></tr>';});
+  h+='</table></div><h2 class="sec">What to scale / what to fix</h2><div class="faint" style="font-size:12px;margin-bottom:8px">Verdicts need \u226520 sent in a segment before they\u2019re trusted.</div>';
+  h+=leaderboard("By geography",function(p){return p.geo})+leaderboard("By platform",function(p){return p.platform})+leaderboard("By signal type",function(p){return p.signalKey});
+  el.innerHTML=h;
+}
+function stat(v,l){return '<div class="stat"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>'}
+/* ============ PROSPECTS ============ */
+function renderProspects(){
+  var el=document.getElementById("view-prospects");var h='<h2 class="sec">All prospects \u00b7 '+DATA.length+'</h2><div class="card tblwrap"><table><tr><th>Name</th><th>Track</th><th>Platform</th><th>Geo</th><th>Status</th><th></th></tr>';
+  DATA.slice().reverse().forEach(function(p){h+='<tr><td><b>'+esc(p.name)+'</b></td><td><span class="badge b-'+p.track+'">'+p.track+'</span></td><td>'+esc(p.platform)+'</td><td>'+esc(p.geo)+'</td><td>'+STAGE_LABEL[p.status]+'</td><td><button class="btn ghost sm" onclick="editProspect(\''+p.id+'\')">Edit</button> <button class="btn ghost sm" onclick="delProspect(\''+p.id+'\')">\u2715</button></td></tr>';});
+  if(!DATA.length)h+='<tr><td colspan="6" class="faint">No prospects. Use Step 1 \u00b7 Find leads, or tap +.</td></tr>';
+  el.innerHTML=h+'</table></div>';
+}
+function delProspect(id){if(!confirm("Delete this prospect?"))return;DATA=DATA.filter(function(p){return p.id!==id});persist();renderAll();toast("Deleted")}
+/* ============ ADD / EDIT ============ */
+function opt(list,sel){return list.map(function(o){return '<option'+(o===sel?' selected':'')+'>'+o+'</option>'}).join("")}
+function signalOpts(track,sel){return Object.keys(TEMPLATES[track].openers).map(function(k){return '<option value="'+k+'"'+(k===sel?' selected':'')+'>'+k+'</option>'}).join("")}
+function editProspect(id){openForm(find(id))}
+function openForm(p){p=p||{};var isNew=!p.id;var track=p.track||"C";
+  document.getElementById("modalInner").innerHTML='<div class="row1" style="justify-content:space-between"><b style="font-size:16px">'+(isNew?"Add prospect":"Edit prospect")+'</b><button class="btn ghost" onclick="closeModal()">\u2715</button></div>'
+    +'<div class="row2"><div class="field"><label>Name</label><input id="f-name" value="'+esc(p.name||"")+'"></div><div class="field"><label>Company</label><input id="f-company" value="'+esc(p.company||"")+'"></div></div>'
+    +'<div class="row2"><div class="field"><label>Track</label><select id="f-track" onchange="onTrackChange()">'+Object.keys(TRACKS).map(function(t){return '<option value="'+t+'"'+(t===track?' selected':'')+'>'+t+' \u2014 '+TRACKS[t]+'</option>'}).join("")+'</select></div><div class="field"><label>Geography</label><select id="f-geo">'+opt(GEOS,p.geo||"IN-tier1")+'</select></div></div>'
+    +'<div class="row2"><div class="field"><label>Platform</label><select id="f-platform">'+opt(PLATFORMS,p.platform||"LinkedIn")+'</select></div><div class="field"><label>Signal type</label><select id="f-signalKey">'+signalOpts(track,p.signalKey||"default")+'</select></div></div>'
+    +'<div class="row2"><div class="field"><label>Profile URL</label><input id="f-profile" placeholder="https://linkedin.com/in/..." value="'+esc(p.profile||"")+'"></div><div class="field"><label>Company website <span class="faint" style="font-size:11px">(for AI research)</span></label><input id="f-website" placeholder="https://acme.com" value="'+esc(p.website||"")+'"></div></div>'
+    +'<div class="field"><label>Signal (what triggered outreach)</label><input id="f-signal" value="'+esc(p.signal||"")+'"></div>'
+    +'<div class="field"><label>Referrer / warm intro <span class="faint" style="font-size:11px">(Track B \u2014 fills the \u201cintro\u201d opener)</span></label><input id="f-referrer" placeholder="e.g. Priya Nair" value="'+esc(p.referrer||"")+'" oninput="rebuildMsg()"></div>'
+    +'<div class="field"><label>Notes</label><input id="f-notes" value="'+esc(p.notes||"")+'"></div>'
+    +'<div class="field"><label>Message (auto-built \u2014 edit the [custom] line)</label><textarea id="f-message" class="msg" style="min-height:120px">'+esc(p.message||"")+'</textarea><button class="btn sm" style="margin-top:6px" onclick="rebuildMsg()">Rebuild from template</button></div>'
+    +'<div class="cardbtns"><button class="btn primary" onclick="saveProspect(\''+(p.id||"")+'\')">Save</button><button class="btn ghost" onclick="closeModal()">Cancel</button></div>';
+  document.getElementById("modal").classList.add("open");if(isNew||!p.message)rebuildMsg();}
+function onTrackChange(){var t=document.getElementById("f-track").value;document.getElementById("f-signalKey").innerHTML=signalOpts(t,"default");rebuildMsg();}
+function rebuildMsg(){var rf=document.getElementById("f-referrer");var p={track:document.getElementById("f-track").value,signalKey:document.getElementById("f-signalKey").value,name:document.getElementById("f-name").value,company:document.getElementById("f-company").value,referrer:rf?rf.value:""};document.getElementById("f-message").value=assembleMessage(p);}
+function saveProspect(id){var p=id?find(id):{id:uid(),status:"to-send",touchCount:0,dates:{},createdAt:today(),owner:SETTINGS.owner};
+  p.name=document.getElementById("f-name").value.trim()||"(no name)";p.company=document.getElementById("f-company").value.trim();p.track=document.getElementById("f-track").value;p.geo=document.getElementById("f-geo").value;p.platform=document.getElementById("f-platform").value;p.signalKey=document.getElementById("f-signalKey").value;p.profile=document.getElementById("f-profile").value.trim();var fw=document.getElementById("f-website");if(fw)p.website=fw.value.trim();p.signal=document.getElementById("f-signal").value.trim();p.referrer=document.getElementById("f-referrer").value.trim();p.notes=document.getElementById("f-notes").value.trim();p.message=document.getElementById("f-message").value;
+  if(!id)DATA.push(p);persist();closeModal();renderAll();toast(id?"Updated":"Added");}
+function closeModal(){document.getElementById("modal").classList.remove("open")}
+
+/* ============ LEAD FINDER (API-wired) ============ */
+var FOUND=[];
+var FEEDKEY="outbound_cockpit_feed_date_v1";
+var FEEDPAGEKEY="outbound_cockpit_feed_page_v1";
+var SEENKEY="outbound_cockpit_seen_v1";
+var DEFAULT_FEED_GEOS=["IN-tier1","IN-tier2","IN-tier3","UAE","US-NRI","US-East","UK","SG","Saudi","Other"];
+function feedGeos(){try{var v=JSON.parse(localStorage.getItem("outbound_cockpit_feed_geos"));return (v&&v.length)?v:DEFAULT_FEED_GEOS;}catch(e){return DEFAULT_FEED_GEOS;}}
+function toggleFeedGeo(g,on){var s=feedGeos().slice(),i=s.indexOf(g);if(on&&i<0)s.push(g);if(!on&&i>=0)s.splice(i,1);if(!s.length)s=DEFAULT_FEED_GEOS.slice();localStorage.setItem("outbound_cockpit_feed_geos",JSON.stringify(s));}
+function seenLedger(){try{return JSON.parse(localStorage.getItem(SEENKEY))||{};}catch(e){return {};}}
+function rememberSeen(keys){var m=seenLedger(),added=[];keys.forEach(function(k){if(k&&!m[k]){m[k]=1;added.push(k);}});localStorage.setItem(SEENKEY,JSON.stringify(m));if(CLOUD&&added.length)pushCloudSeen(added);}
+function pushCloudSeen(keys){if(!CLOUD||!keys||!keys.length)return;fetch("/api/cockpit-seen",{method:"PUT",headers:hdrs(),body:JSON.stringify({keys:keys})}).catch(function(){});}
+function mergeCloudSeen(){if(!CLOUD)return;fetch("/api/cockpit-seen",{headers:hdrs()}).then(function(r){return r.ok?r.json():null;}).then(function(j){if(!j||!j.keys)return;var m=seenLedger(),local=Object.keys(m),add=[];j.keys.forEach(function(k){if(!m[k])m[k]=1;});localStorage.setItem(SEENKEY,JSON.stringify(m));local.forEach(function(k){if(j.keys.indexOf(k)<0)add.push(k);});if(add.length)pushCloudSeen(add);}).catch(function(){});}
+function feedRoute(t){return "apollo";}
+function feedPlan(){
+  var tg=SETTINGS.targets||{},plan=[];
+  ["A","B","C","D"].forEach(function(t){
+    var sum=0,row=tg[t]||{};Object.keys(row).forEach(function(pl){sum+=(+row[pl]||0);});
+    if(sum>0)plan.push({track:t,count:sum,route:feedRoute(t)});
+  });
+  return plan;
+}
+function keyOf(p){return ((p.profile||"").trim().toLowerCase())||((p.name||"").trim().toLowerCase()+"|"+(p.platform||"").toLowerCase());}
+function existingKeys(){var m={};DATA.forEach(function(p){m[keyOf(p)]=true;});return m;}
+function getStepCount(out,track){var n=0;out.forEach(function(p){if(p._track===track)n++;});return n;}
+function trackBreakdown(t){var row=(SETTINGS.targets&&SETTINGS.targets[t])||{};var parts=[],sum=0;PLATFORMS.forEach(function(pl){var n=+row[pl]||0;if(n>0){parts.push(n+" "+pl);sum+=n;}});return {sum:sum,txt:parts.join(" + ")||"\u2014"};}
+function dailyPlanHTML(){
+  var geos=feedGeos(),total=0,rows="";
+  Object.keys(TRACKS).forEach(function(t){
+    var b=trackBreakdown(t);total+=b.sum;
+    rows+='<tr><td><span class="badge b-'+t+'">'+t+'</span> '+TRACKS[t]+'</td><td class="faint" style="font-size:12px">'+esc(TRACK_DESC[t]||"")+'</td><td style="text-align:center"><b>'+b.sum+'</b></td><td class="muted" style="font-size:12px">'+esc(b.txt)+'</td></tr>';
+  });
+  rows+='<tr style="border-top:1px solid rgba(255,255,255,.12)"><td><b>Total / day</b></td><td class="faint" style="font-size:12px">across '+geos.length+' region'+(geos.length!=1?"s":"")+'</td><td style="text-align:center"><b style="color:#86eeb0">'+total+'</b></td><td class="muted" style="font-size:12px">deduped vs sent</td></tr>';
+  return '<div class="card planbox"><div class="row1" style="justify-content:space-between;align-items:center"><b>Your daily plan</b><span class="chip">'+total+'/day \u00b7 LinkedIn (Apollo)</span></div>'
+    +'<div class="tblwrap" style="margin-top:10px"><table class="plantbl"><tr><th>Track</th><th>What it means</th><th style="text-align:center">/day</th><th>From your targets</th></tr>'+rows+'</table></div>'
+    +'<div class="hint">Auto-sourced from Apollo as LinkedIn profiles, geo-tagged across: <b>'+esc(geos.join(", "))+'</b>. Numbers follow your <a href="#" onclick="showTab(\'settings\');return false">Setup targets</a> \u2014 edit there and this updates. Twitter / Reddit are manual-only (add with +).</div></div>';
+}
+function renderLeads(){
+  var el=document.getElementById("view-leads");
+  var ran=localStorage.getItem(FEEDKEY)===today();
+  var plan=feedPlan();
+  var planTxt=plan.length?plan.map(function(x){return x.count+" "+TRACKS[x.track];}).join("  |  ")+"  \u00b7  Apollo \u00b7 "+feedGeos().join("/"):"Set your daily targets in Setup to shape this feed.";
+  var h='<h2 class="sec">Step 1 \u00b7 Today\u2019s lead feed</h2>';
+  h+=dailyPlanHTML();
+  h+='<div class="card feedcard"><div class="feedhead"><div><b style="font-size:15px">Auto-sourced for you</b><div class="muted" style="font-size:12px;margin-top:4px">'+planTxt+'</div></div>'
+    +'<button class="btn primary" id="lf-feed" onclick="runDailyFeed()">'+(ran?"Refresh feed":"Build today\u2019s feed")+'</button></div>'
+    +'<div id="lf-progress" class="muted" style="font-size:12px;margin-top:12px"></div></div>';
+  h+='<div class="card"><b style="font-size:15px">Add from URL \u2014 LinkedIn / Twitter / Reddit</b>'
+    +'<div class="muted" style="font-size:12px;margin:6px 0 10px">Spotted someone on a social channel? Paste their link, and optionally paste what they posted \u2014 <b>Classify &amp; add</b> uses AI to read the post, pick the track + signal, and draft an opener (the C/D behavioral triggers Apollo can\u2019t see).</div>'
+    +'<input id="qa-url" placeholder="https://linkedin.com/in/\u2026  \u00b7  x.com/\u2026  \u00b7  reddit.com/u/\u2026">'
+    +'<textarea id="qa-text" class="msg" style="margin-top:8px;min-height:70px" placeholder="Paste what they posted \u2014 co-founder hunt, MVP-cost question, idea validation\u2026 (optional, enables AI classify)"></textarea>'
+    +'<div class="src-btns" style="margin-top:10px"><button class="btn primary" onclick="classifyAndAdd()">Classify &amp; add</button> <button class="btn ghost" onclick="quickAddFromUrl()">Add from URL only</button></div></div>';
+  h+='<div class="card"><b style="font-size:15px">Find by LinkedIn posts (Apify) \u2014 intent search</b>'
+    +'<div class="muted" style="font-size:12px;margin:6px 0 10px">Apollo sees <i>who fits</i>; this sees <i>who\u2019s asking right now</i>. Searches LinkedIn <b>posts</b> for your keywords and turns the authors into leads \u2014 carrying their post as the \u201cwhy now\u201d signal. One phrase per line, ranked by relevance. <b>Wrap a phrase in &quot;quotes&quot;</b> for an exact match (far less noise); 85 chars max each.</div>'
+    +'<textarea id="ps-queries" class="msg" style="min-height:96px">'+esc(postQueries())+'</textarea>'
+    +'<div class="row2" style="margin-top:10px"><div class="field"><label>Posted within</label><select id="ps-time"><option value="24h">Last 24 hours</option><option value="week">Last week</option><option value="month" selected>Last month</option><option value="3months">Last 3 months</option></select></div>'
+    +'<div class="field"><label>Import as track</label><select id="ps-track">'+Object.keys(TRACKS).map(function(t){return '<option value="'+t+'"'+(t==="C"?" selected":"")+'>'+t+' \u2014 '+TRACKS[t]+'</option>'}).join("")+'</select></div></div>'
+    +'<div class="row2" style="margin-top:10px"><div class="field"><label>Per phrase (top matches)</label><select id="ps-perphrase"><option value="2" selected>2 \u2014 tightest</option><option value="3">3</option><option value="5">5</option><option value="10">10 \u2014 widest</option></select></div><div class="field"></div></div>'
+    +'<div class="src-btns" style="margin-top:10px"><button class="btn primary" id="ps-run" onclick="findPostLeads()">Search posts \u2192 leads</button></div>'
+    +'<div class="hint" style="margin-top:8px">Pay-per-result via Apify (no LinkedIn login). Takes the top N <i>most relevant</i> posts per phrase, de-duplicates to one lead per person. With 12 phrases \u00d7 2 \u2248 ~24 leads \u2014 pairs with your Apollo feed for ~50/day. Review, then Import.</div></div>';
+  h+='<details class="adv"><summary>Customize &amp; manual search</summary><div class="card" style="margin-top:10px">'
+    +'<div class="field"><label>Regions for funded/enterprise (Apollo) feed \u2014 sourced across all ticked</label><div class="geochks">'+GEOS.map(function(g){var on=feedGeos().indexOf(g)>=0;return '<label class="gchk'+(on?" on":"")+'"><input type="checkbox" '+(on?"checked":"")+' onchange="toggleFeedGeo(\''+g+'\',this.checked);this.parentNode.classList.toggle(\'on\',this.checked)"> '+g+'</label>';}).join("")+'</div></div>'
+    +'<div class="row2" style="margin-top:10px"><div class="field"><label>Track</label><select id="lf-track">'+Object.keys(TRACKS).map(function(t){return '<option value="'+t+'">'+t+' \u2014 '+TRACKS[t]+'</option>'}).join("")+'</select></div><div class="field"><label>Geography (Apollo)</label><select id="lf-geo">'+opt(GEOS,feedGeos()[0])+'</select></div></div>'
+    +'<div class="field" style="margin-top:10px"><label>Focus keywords (optional) \u2014 applies to the daily feed too</label><input id="lf-keywords" value="'+esc(feedKeywords())+'" placeholder="e.g. fintech \u00b7 machine learning \u00b7 healthtech" onchange="setFocusKeywords(this.value)"><div class="hint" style="margin-top:6px">Narrows results to a sector. Apollo matches this as <b>literal text</b> in the person\u2019s title/headline and company name (not a true industry filter), so it cuts the pool hard \u2014 leave blank for max reach, set it for a focused campaign.</div></div>'
+    +'<div class="src-btns"><button class="btn" id="lf-apollo" onclick="findApollo()">Find on Apollo (key)</button> <button class="btn ghost" id="lf-test" onclick="testApollo()">Test Apollo key</button></div>'
+    +'<div class="hint">The daily feed runs Apollo for you automatically across the regions above. Apollo needs APOLLO_API_KEY. Spotted someone on LinkedIn / Twitter / Reddit? Add them by hand with the + button.</div></div></details>';
+  h+='<div id="lf-results"></div>';
+  el.innerHTML=h;
+  if(FOUND.length)renderFound();
+  else if(!ran&&plan.length)runDailyFeed();
+}
+// Per-(track|geo) page cursor so each daily run pulls FRESH leads instead of
+// re-fetching page 1 (which dedup would empty). Persisted in localStorage.
+function feedPageGet(track,geo){try{var m=JSON.parse(localStorage.getItem(FEEDPAGEKEY)||"{}");return m[track+"|"+geo]||1;}catch(e){return 1;}}
+function feedPageSet(track,geo,n){try{var m=JSON.parse(localStorage.getItem(FEEDPAGEKEY)||"{}");m[track+"|"+geo]=n;localStorage.setItem(FEEDPAGEKEY,JSON.stringify(m));}catch(e){}}
+function feedKeywords(){return (SETTINGS.focusKeywords||"").trim();}
+function setFocusKeywords(v){SETTINGS.focusKeywords=(v||"").trim();localSave();}
+async function runDailyFeed(){
+  var plan=feedPlan();
+  if(!plan.length){toast("Set daily targets in Setup first");showTab("settings");return;}
+  var btn=document.getElementById("lf-feed");if(btn){btn.disabled=true;btn.innerHTML='<span class="spin"></span> Building\u2026';}
+  var prog=document.getElementById("lf-progress");
+  var seen=Object.assign(existingKeys(),seenLedger()),out=[],notes=[];
+  var kw=feedKeywords();var kwQS=kw?"&keywords="+encodeURIComponent(kw):"";
+  for(var i=0;i<plan.length;i++){
+    var step=plan[i];
+    var geos=feedGeos();
+    for(var gi=0;gi<geos.length&&getStepCount(out,step.track)<step.count;gi++){
+      var geo=geos[gi];
+      if(prog)prog.innerHTML='<span class="spin"></span> Sourcing '+TRACKS[step.track]+' on Apollo \u00b7 '+geo+'\u2026 ('+(i+1)+'/'+plan.length+')';
+      var need=Math.ceil((step.count-getStepCount(out,step.track))/(geos.length-gi));
+      var pg=feedPageGet(step.track,geo);
+      try{
+        var ra=await fetch("/api/leads/apollo?track="+step.track+"&geo="+encodeURIComponent(geo)+"&limit=100&page="+pg+kwQS),ja=await ra.json();
+        if(!ra.ok){notes.push(TRACKS[step.track]+" "+geo+": "+(ja.error||"skipped"));continue;}
+        var returned=(ja.prospects||[]).length;
+        var gotA=0;
+        (ja.prospects||[]).forEach(function(p){if(gotA>=need)return;if(!p.geo)p.geo=geo;var k=keyOf(p);if(seen[k])return;seen[k]=true;p._track=step.track;out.push(p);gotA++;});
+        // Advance the cursor; if Apollo ran out of pages, wrap back to page 1.
+        var total=ja.total||0,perPage=ja.per_page||100;
+        var nextPg=(returned<perPage||(total&&pg*perPage>=total))?1:pg+1;
+        feedPageSet(step.track,geo,nextPg);
+      }catch(e){notes.push(TRACKS[step.track]+" "+geo+": offline \u2014 set APOLLO_API_KEY or run the server");}
+    }
+  }
+  out.forEach(function(p){delete p._track;});
+  FOUND=out;localStorage.setItem(FEEDKEY,today());
+  if(btn){btn.disabled=false;btn.innerHTML="Refresh feed";}
+  if(prog)prog.innerHTML=out.length?('<b style="color:#86eeb0">'+out.length+' fresh leads ready</b> \u2014 review &amp; import below'+(notes.length?'<div class="faint" style="margin-top:4px">'+esc(notes.join(" \u00b7 "))+'</div>':"")):('No new leads right now.'+(notes.length?'<div class="faint" style="margin-top:4px">'+esc(notes.join(" \u00b7 "))+'</div>':""));
+  renderFound();
+}
+function setBusy(btnId,on,label){var b=document.getElementById(btnId);if(!b)return;b.disabled=on;b.innerHTML=on?'<span class="spin"></span> Searching\u2026':label;}
+// Quoted phrases = LinkedIn matches the EXACT phrase (buyer-intent, not recruiter
+// noise). FOUNDER-framed wording on purpose: "need help building" / "build my
+// idea" pulls founders who want a partner, not job reqs. (Tested: "looking for
+// an AI developer" returns mostly recruiters, so we avoid that phrasing.)
+// Ordered best-first and weighted to Track C (first-time) + D (idea-stage).
+var DEFAULT_POST_QUERIES=[
+  '"looking for a technical cofounder"',
+  '"need a technical cofounder"',
+  '"need help building an MVP"',
+  '"need help building an AI product"',
+  '"looking for an AI development partner"',
+  '"looking for a development partner"',
+  '"looking for a development agency"',
+  '"looking to outsource development"',
+  '"need a developer to build my idea"',
+  '"validating my startup idea"',
+  '"turn my idea into a product"',
+  '"how much does it cost to build an app"'
+].join("\n");
+function postQueries(){return (SETTINGS.postQueries||DEFAULT_POST_QUERIES);}
+async function findPostLeads(){
+  var qEl=document.getElementById("ps-queries");var q=qEl?qEl.value.trim():"";
+  if(!q){toast("Add at least one keyword or phrase");return;}
+  SETTINGS.postQueries=q;localSave();
+  var track=(document.getElementById("ps-track")||{}).value||"C";
+  var time=(document.getElementById("ps-time")||{}).value||"month";
+  var per=parseInt((document.getElementById("ps-perphrase")||{}).value||"2",10)||2;
+  var geo=feedGeos()[0]||GEOS[0];
+  setBusy("ps-run",true);
+  document.getElementById("lf-results").innerHTML='<div class="card muted" style="display:flex;align-items:center;gap:8px"><span class="spin"></span> Searching LinkedIn posts via Apify\u2026 this can take 20\u201360s</div>';
+  try{
+    var r=await fetch("/api/leads/apify-search",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({queries:q,track:track,geo:geo,postedLimit:time,maxPosts:per})});
+    var j=await r.json();
+    if(!r.ok){showLeadError(j.error||"Apify post search failed");return;}
+    FOUND=(j.prospects||[]);
+    if(!FOUND.length){showLeadError("No posts matched those phrases in that window. Try broader wording or a longer timeframe.");}
+    else{renderFound();toast("Found "+FOUND.length+" people posting about this");}
+  }catch(e){showLeadError("Could not reach /api/leads/apify-search \u2014 is the server running with APIFY_TOKEN set?");}
+  finally{setBusy("ps-run",false,"Search posts \u2192 leads");}
+}
+async function findApollo(){
+  var track=document.getElementById("lf-track").value,geo=document.getElementById("lf-geo").value;
+  var kwEl=document.getElementById("lf-keywords");var kw=kwEl?kwEl.value.trim():feedKeywords();
+  var kwQS=kw?"&keywords="+encodeURIComponent(kw):"";
+  setBusy("lf-apollo",true);
+  try{var r=await fetch("/api/leads/apollo?track="+track+"&geo="+encodeURIComponent(geo)+"&limit=100"+kwQS);var j=await r.json();
+    if(!r.ok){showLeadError(j.error||"Apollo error");return;}
+    FOUND=(j.prospects||[]);renderFound();toast("Found "+FOUND.length+" on Apollo");
+  }catch(e){showLeadError("Could not reach /api/leads/apollo. Deploy or run vercel dev, and set APOLLO_API_KEY.");}
+  finally{setBusy("lf-apollo",false,"Find on Apollo (key)");}
+}
+async function testApollo(){
+  var geo=feedGeos()[0]||GEOS[0];setBusy("lf-test",true);
+  try{
+    var r=await fetch("/api/leads/apollo?track=A&geo="+encodeURIComponent(geo)+"&limit=1");var j=await r.json();
+    if(!r.ok){showLeadError("Search key check failed: "+(j.error||r.status));return;}
+    var total=j.total!=null?j.total.toLocaleString():"?";
+    document.getElementById("lf-results").innerHTML='<div class="card" style="border-color:rgba(134,238,176,.4)"><b style="color:#86eeb0">Apollo key works \u2713</b><div class="muted" style="margin-top:6px">Master key authenticated for People Search. Matching pool for A \u00b7 '+esc(geo)+': <b>'+total+'</b> people. Profiles (LinkedIn URL) are revealed via enrichment when you import.</div></div>';
+    toast("Apollo search OK");
+  }catch(e){showLeadError("Could not reach /api/leads/apollo \u2014 is the server running?");}
+  finally{setBusy("lf-test",false,"Test Apollo key");}
+}
+function showLeadError(msg){document.getElementById("lf-results").innerHTML='<div class="card" style="border-color:rgba(255,93,108,.4)"><b style="color:#ffa3ac">Heads up</b><div class="muted" style="margin-top:6px">'+esc(msg)+'</div></div>';}
+function slugName(s){try{s=decodeURIComponent(s);}catch(e){}s=s.replace(/[-_]+\d+$/,"").replace(/[-_.]+/g," ").trim();return s.replace(/\b\w/g,function(c){return c.toUpperCase();});}
+function parseLeadUrl(u){
+  u=(u||"").trim();var out={profile:u,platform:"LinkedIn",name:"",company:"",track:"C",signalKey:"default"};
+  if(!u)return out;
+  if(!/^https?:\/\//i.test(u))u="https://"+u;
+  var host="",path="";try{var url=new URL(u);host=url.hostname.replace(/^www\./,"").toLowerCase();path=url.pathname;}catch(e){return out;}
+  if(/linkedin\./.test(host)){out.platform="LinkedIn";out.track="A";var mm=path.match(/\/in\/([^\/]+)/);if(mm)out.name=slugName(mm[1]);}
+  else if(/(twitter\.|x\.com)/.test(host)){out.platform="Twitter";out.track="C";var seg=path.split("/").filter(Boolean);if(seg[0]&&seg[0]!=="i")out.name="@"+seg[0];}
+  else if(/reddit\./.test(host)){out.platform="Reddit";out.track="D";out.signalKey="idea_help";var um=path.match(/\/(?:user|u)\/([^\/]+)/);if(um)out.name="u/"+um[1];}
+  out.profile=u;return out;
+}
+function platformGuess(track,parsed){if(parsed&&parsed.profile)return parsed.platform;return track==="D"?"Reddit":"Twitter";}
+function injectFormCustom(line){if(!line)return;var ma=document.getElementById("f-message");if(!ma)return;ma.value=ma.value.replace(/\[\[custom:.*?\]\]/,"[[custom: "+line+"]]");}
+function quickAddFromUrl(){
+  var ue=document.getElementById("qa-url"),te=document.getElementById("qa-text");
+  var url=ue?ue.value.trim():"";if(!url){toast("Paste a profile or post URL");return;}
+  var note=te?te.value.trim():"";var d=parseLeadUrl(url);
+  if(!(TEMPLATES[d.track]&&TEMPLATES[d.track].openers[d.signalKey]))d.signalKey="default";
+  openForm({track:d.track,platform:d.platform,profile:d.profile,name:d.name,company:d.company,geo:feedGeos()[0]||"IN-tier1",signal:note,signalKey:d.signalKey});
+  if(ue)ue.value="";if(te)te.value="";
+}
+function openerMapAll(){var m={};Object.keys(TEMPLATES).forEach(function(t){m[t]=Object.keys(TEMPLATES[t].openers);});return m;}
+async function classifyAndAdd(){
+  var ue=document.getElementById("qa-url"),te=document.getElementById("qa-text");
+  var url=ue?ue.value.trim():"",text=te?te.value.trim():"";
+  if(!text){toast("Paste what they posted to classify (or use Add from URL only)");return;}
+  var parsed=parseLeadUrl(url);
+  toast("Classifying\u2026");
+  try{
+    var r=await fetch("/api/agent/classify",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:text,url:url,hintTrack:parsed.track,openerMap:openerMapAll()})});
+    var j=await r.json();
+    if(!r.ok){toast(j.error||"Classify failed");return;}
+    var track=(TEMPLATES[j.track]?j.track:parsed.track)||"C";
+    var signalKey=(TEMPLATES[track]&&TEMPLATES[track].openers[j.signalKey])?j.signalKey:"default";
+    openForm({track:track,platform:platformGuess(track,parsed),profile:parsed.profile||url,name:j.nameGuess||parsed.name,company:parsed.company,geo:feedGeos()[0]||"IN-tier1",signal:j.signal||"",signalKey:signalKey});
+    injectFormCustom(j.customLine);
+    if(ue)ue.value="";if(te)te.value="";
+    toast(j.mode==="heuristic"?"Classified (heuristic) \u2014 review & save":"Classified \u2014 review & save");
+  }catch(e){toast("Could not reach /api/agent/classify \u2014 is the server and agent running?");}
+}
+function renderFound(){
+  var needEnrich=FOUND.some(function(p){return p.source==="apollo"&&p.apolloId&&!p.profile;});
+  var h='<div class="row1" style="justify-content:space-between;margin:4px 2px 8px"><b>'+FOUND.length+' found</b><div><button class="btn sm" onclick="selectAllLeads(true)">Select all</button> <button class="btn primary sm" id="lf-import" onclick="importFound()">Import selected</button></div></div>';
+  FOUND.forEach(function(p,i){var preview=p.source==="apollo"&&p.apolloId&&!p.profile;h+='<div class="lead"><input type="checkbox" id="lead-'+i+'" checked><div style="flex:1"><div class="row1"><b>'+esc(p.name)+'</b>'+(preview?'<span class="chip" style="opacity:.7">preview</span>':'')+'<span class="badge b-'+p.track+'">'+p.track+'</span><span class="chip">'+esc(p.platform)+'</span>'+(p.geo?'<span class="chip">'+esc(p.geo)+'</span>':'')+(p.company?'<span class="chip">'+esc(p.company)+'</span>':'')+'</div><div class="faint" style="font-size:12px;margin-top:3px">'+esc(p.signal||"")+'</div>'+(p.profile?'<a href="'+esc(p.profile)+'" target="_blank" style="font-size:12px">open \u2197</a>':'')+'</div></div>';});
+  h+='<div class="hint" style="margin-top:8px">On import we fetch each company\u2019s funding, size &amp; hiring signals from Apollo and store them on the prospect \u2014 so AI analyse (and every re-analysis) runs at <b>0 extra Apollo credits</b>. Costs ~1 Apollo credit per company, once.</div>';
+  if(needEnrich)h+='<div class="hint" style="margin-top:8px">Apollo previews hide the surname &amp; profile link. Importing reveals the full name + LinkedIn URL via Apollo enrichment (uses ~1 Apollo credit per imported lead).</div>';
+  document.getElementById("lf-results").innerHTML=h;
+}
+function selectAllLeads(v){FOUND.forEach(function(_,i){var c=document.getElementById("lead-"+i);if(c)c.checked=v;})}
+async function importFound(){
+  var sel=[];FOUND.forEach(function(p,i){var c=document.getElementById("lead-"+i);if(c&&c.checked)sel.push(p);});
+  if(!sel.length){toast("Nothing selected");return;}
+  var ib=document.getElementById("lf-import");
+  var toEnrich=sel.filter(function(p){return p.source==="apollo"&&p.apolloId&&!p.profile;});
+  if(toEnrich.length){
+    if(ib){ib.disabled=true;ib.innerHTML='<span class="spin"></span> Revealing\u2026';}
+    try{
+      for(var b=0;b<toEnrich.length;b+=10){
+        var batch=toEnrich.slice(b,b+10);
+        var r=await fetch("/api/leads/apollo-enrich",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({details:batch.map(function(x){return {id:x.apolloId,track:x.track,geo:x.geo};})})});
+        var j=await r.json();
+        if(r.ok){(j.prospects||[]).forEach(function(e){var m;for(var k=0;k<toEnrich.length;k++){if(toEnrich[k].apolloId===e.apolloId){m=toEnrich[k];break;}}if(m){if(e.name)m.name=e.name;if(e.profile)m.profile=e.profile;if(e.company)m.company=e.company;if(e.signal)m.signal=e.signal;if(e.notes)m.notes=e.notes;if(e.platform)m.platform=e.platform;if(e.twitter)m.twitter=e.twitter;if(e.email)m.email=e.email;if(e.domain)m.domain=e.domain;if(e.orgId)m.orgId=e.orgId;if(e.signalKey&&TEMPLATES[m.track]&&TEMPLATES[m.track].openers[e.signalKey])m.signalKey=e.signalKey;}});}
+        else{toast(j.error||"Enrichment failed \u2014 importing previews");}
+      }
+    }catch(e){toast("Enrichment offline \u2014 importing previews");}
+  }
+  // Always-on company-facts capture: fetch org facts (funding/size/hiring) for
+  // every imported Apollo lead with a domain and STORE them on the prospect, so
+  // AI analyse + every re-analysis later spend 0 Apollo credits. ~1 credit per
+  // uncached company, once. signalKey is applied only if valid for that track.
+  var factable=sel.filter(function(p){return (p.domain||p.orgId)&&!p.companyFacts;});
+  if(factable.length){
+    if(ib)ib.innerHTML='<span class="spin"></span> Fetching company facts\u2026';
+    try{
+      for(var ob=0;ob<factable.length;ob+=10){
+        var obatch=factable.slice(ob,ob+10);
+        var rr=await fetch("/api/leads/apollo-org",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({orgs:obatch.map(function(x){return {domain:x.domain,id:x.orgId};})})});
+        var jj=await rr.json();
+        if(rr.ok){(jj.orgs||[]).forEach(function(o){var m=null;for(var k=0;k<factable.length;k++){if((o.domain&&factable[k].domain===o.domain)||(o.id&&factable[k].orgId===o.id)){m=factable[k];break;}}if(!m)return;
+          if(o.facts)m.companyFacts=o.facts;if(o.hiringTitles)m.hiringTitles=o.hiringTitles;if(o.allRoles)m.allRoles=o.allRoles;
+          var ops=(TEMPLATES[m.track]&&TEMPLATES[m.track].openers)||{};
+          if(o.signalKey&&ops[o.signalKey]){m.signalKey=o.signalKey;if(o.signal)m.signal=o.signal;}});}
+        else{toast(jj.error||"Company facts unavailable \u2014 importing without them");}
+      }
+    }catch(e){toast("Company facts offline \u2014 importing without them");}
+  }
+  var n=0,skipped=0,keys=[];sel.forEach(function(p){
+    if(p.source==="apollo"&&!p.profile){skipped++;return;}
+    var np=Object.assign({id:uid(),status:"to-send",touchCount:0,dates:{},createdAt:today(),owner:SETTINGS.owner},p);np.message=assembleMessage(np);DATA.push(np);keys.push(keyOf(np));n++;});
+  rememberSeen(keys);FOUND=[];persist();renderAll();showTab("today");
+  toast("Imported "+n+(skipped?" \u00b7 "+skipped+" skipped (no LinkedIn)":"")+" \u2192 see Today\u2019s queue");
+}
+/* ============ SETTINGS ============ */
+function renderSettings(){
+  var el=document.getElementById("view-settings");
+  var h='<h2 class="sec">Daily targets \u00b7 safe-cap guarded</h2><div class="card tblwrap"><table><tr><th>Track</th><th>Platform</th><th>Target/day</th><th>Safe cap</th></tr>';
+  Object.keys(TRACKS).forEach(function(t){PLATFORMS.forEach(function(pl){var tgt=(SETTINGS.targets[t]&&SETTINGS.targets[t][pl])||0;var cap=SAFE_CAPS[pl];h+='<tr><td>'+t+'</td><td>'+pl+'</td><td><input type="number" min="0" max="'+cap+'" value="'+tgt+'" style="width:64px" onchange="setTarget(\''+t+'\',\''+pl+'\',this.value)"></td><td>'+(tgt>cap?'<span class="tag kill">over cap!</span>':'<span class="faint">'+cap+'</span>')+'</td></tr>';});});
+  h+='</table><div class="hint">Capped at safe platform limits to protect your accounts. Raise when you add a VA.</div></div>';
+  h+='<h2 class="sec">Sync & access</h2><div class="card"><div class="field"><label>Cloud token (optional \u2014 must match COCKPIT_TOKEN in Vercel)</label><input id="set-token" value="'+esc(SETTINGS.token||"")+'" placeholder="leave blank if not using a token"></div><button class="btn" onclick="saveToken()">Save token</button><div class="hint">Status: '+(CLOUD?'<b style="color:#86eeb0">cloud synced</b> \u2014 same data on phone + desktop':'<b>local only</b> \u2014 deploy with MONGODB_URI to sync to phone')+'</div></div>';
+  h+='<h2 class="sec">Data</h2><div class="card"><div class="cardbtns"><button class="btn" onclick="exportCSV()">Export CSV</button><button class="btn" onclick="document.getElementById(\'csvfile\').click()">Import CSV</button><input type="file" id="csvfile" accept=".csv" style="display:none" onchange="importCSV(this)"><button class="btn" onclick="resetAllToQueue()">Reset all to queue</button><button class="btn ghost" onclick="clearAll()">Clear all</button></div><div class="hint">CSV columns: name,company,track,geo,platform,signalKey,profile,signal,notes<br><b>Reset all to queue</b> moves every prospect back to Step 2 (keeps name, signal, message) and clears sent history, conversation stage, and saved AI briefs.</div></div>';
+  el.innerHTML=h;
+}
+function setTarget(t,pl,v){SETTINGS.targets[t]=SETTINGS.targets[t]||{};SETTINGS.targets[t][pl]=Math.min(parseInt(v||0,10),SAFE_CAPS[pl]);persist();renderSettings();renderToday();renderLeads();}
+function saveToken(){SETTINGS.token=document.getElementById("set-token").value.trim();localSave();toast("Token saved \u2014 reloading sync");bootStore().then(renderAll);}
+function resetAllToQueue(){
+  if(!DATA.length){toast("No prospects to reset");return;}
+  if(!confirm("Move ALL "+DATA.length+" prospects back to the send queue?\n\nKeeps: name, company, signal, profile, message draft.\nClears: sent history, conversation stage, touch count, dates, AI briefs.\n\nEveryone will appear in Today\u2019s queue."))return;
+  var n=0;
+  DATA.forEach(function(p){
+    p.status="to-send";
+    p.touchCount=0;
+    p.dates={};
+    p.touches=[];
+    p.createdAt=today();
+    delete p.lastTouch;
+    delete p.nextTouch;
+    delete p.aiBrief;
+    n++;
+  });
+  persist();renderAll();showTab("today");
+  toast("Reset "+n+" prospects \u2192 Today\u2019s queue");
+}
+function clearAll(){if(!confirm("Delete ALL prospects? Export first if unsure."))return;DATA=[];persist();renderAll();toast("Cleared")}
+function exportCSV(){var cols=["name","company","track","geo","platform","signalKey","profile","signal","notes","status","touchCount"];var rows=[cols.join(",")];DATA.forEach(function(p){rows.push(cols.map(function(c){return '"'+String(p[c]==null?"":p[c]).replace(/"/g,'""')+'"'}).join(","))});var b=new Blob([rows.join("\n")],{type:"text/csv"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="outbound-prospects-"+today()+".csv";a.click();toast("Exported");}
+function parseCSVLine(line){var out=[],cur="",q=false;for(var i=0;i<line.length;i++){var ch=line[i];if(q){if(ch==='"'){if(line[i+1]==='"'){cur+='"';i++}else q=false}else cur+=ch}else{if(ch===','){out.push(cur);cur=""}else if(ch==='"')q=true;else cur+=ch}}out.push(cur);return out;}
+function importCSV(input){var f=input.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(e){var lines=e.target.result.split(/\r?\n/).filter(function(l){return l.trim()});var head=parseCSVLine(lines[0]);var n=0;for(var i=1;i<lines.length;i++){var c=parseCSVLine(lines[i]);var o={};head.forEach(function(hh,j){o[hh.trim()]=c[j]});if(!o.name)continue;var p={id:uid(),status:"to-send",touchCount:0,dates:{},createdAt:today(),owner:SETTINGS.owner,name:o.name,company:o.company||"",track:(o.track||"C").toUpperCase(),geo:o.geo||"IN-tier1",platform:o.platform||"LinkedIn",signalKey:o.signalKey||"default",profile:o.profile||"",signal:o.signal||"",notes:o.notes||""};if(!TRACKS[p.track])p.track="C";if(!TEMPLATES[p.track].openers[p.signalKey])p.signalKey="default";p.message=assembleMessage(p);DATA.push(p);n++;}persist();renderAll();toast("Imported "+n);};rd.readAsText(f);input.value="";}
+/* ============ HELP ============ */
+function renderHelp(){document.getElementById("view-help").innerHTML='<div class="help card"><h3>The 4-step flow (top bar)</h3><p><b>1 Find leads</b> \u2014 auto-sourced from Apollo across your regions; add LinkedIn/Twitter/Reddit catches by hand with the + button. <b>2 Queue</b> \u2014 send personalized messages (copy \u2192 open profile \u2192 mark sent). Filter by region, platform, or good-send-time, and use the \uD83D\uDCC5 day filter to catch up on any day you missed \u2014 overdue items never disappear. <b>3 Conversations</b> \u2014 everyone you\u2019ve messaged; pick a day on the calendar to see who you sent then, and update anyone\u2019s stage (replied \u2192 call \u2192 proposal \u2192 won/lost) whenever they respond, even weeks later. <b>4 Review</b> \u2014 see what\u2019s working, scale it.</p><h3>The one rule</h3><p>Never send with the yellow [bracket] untouched. That one human line is what makes it personal, not spam.</p><h3>Safety</h3><p>Daily targets capped at safe limits (LinkedIn 20, Twitter 20, Reddit 4). Lead Finder runs server-side so your accounts are never automated against.</p><h3>Phone sync</h3><p>When deployed with MONGODB_URI, the top-right dot turns green and your phone + desktop share one dataset. Otherwise data is local to this browser \u2014 export CSV to back up.</p></div>';}
+/* ============ ROUTING + BOOT ============ */
+function renderAll(){renderLeads();renderToday();renderPipeline();renderAnalytics();renderProspects();renderSettings();renderHelp();updateCounts();}
+function updateCounts(){
+  var convo=DATA.filter(function(p){return ACTIVE_CONVO.indexOf(p.status)>=0}).length;
+  var today_=DATA.filter(dueInColdQueue).length;
+  document.getElementById("s-leads").textContent=DATA.filter(function(p){return p.status==="to-send"&&(p.touchCount||0)===0}).length;
+  var stoday=document.getElementById("s-today");stoday.textContent=today_;
+  var od=DATA.filter(function(p){return (p.status==="to-send"||p.status==="sent")&&queueDate(p)<today();}).length;
+  stoday.title=od?(od+" overdue \u2014 catch up in the Queue"):"";stoday.style.color=od?"#ffb3ba":"";
+  document.getElementById("s-convo").textContent=convo;
+  document.getElementById("s-won").textContent=DATA.filter(function(p){return p.status==="won"}).length;
+}
+var TABS=["leads","today","pipeline","analytics","prospects","settings","help"];
+function showTab(name){TABS.forEach(function(t){var v=document.getElementById("view-"+t);if(v)v.style.display=(t===name?"block":"none");});
+  Array.prototype.forEach.call(document.querySelectorAll(".step"),function(b){b.classList.toggle("active",b.dataset.tab===name);});
+  Array.prototype.forEach.call(document.querySelectorAll(".bnav button"),function(b){b.classList.toggle("active",b.dataset.tab===name);});
+  window.scrollTo(0,0);
+}
+document.getElementById("stepper").addEventListener("click",function(e){var b=e.target.closest(".step");if(b)showTab(b.dataset.tab)});
+document.getElementById("bnav").addEventListener("click",function(e){var b=e.target.closest("button");if(b)showTab(b.dataset.tab)});
+document.getElementById("fab").addEventListener("click",function(){openForm()});
+document.getElementById("modal").addEventListener("click",function(e){if(e.target.id==="modal")closeModal()});
+function applyTheme(t){var light=t==="light";document.body.classList.toggle("light",light);var b=document.getElementById("themebtn");if(b)b.textContent=light?"\u2600\ufe0e":"\u263e";var m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute("content",light?"#f4f7fc":"#0a0e1a");}
+function toggleTheme(){var t=(localStorage.getItem("outbound_cockpit_theme")==="light")?"dark":"light";localStorage.setItem("outbound_cockpit_theme",t);applyTheme(t);}
+applyTheme(localStorage.getItem("outbound_cockpit_theme")||"dark");
+bootStore().then(function(){renderAll();showTab("leads");});
+</script>
+</body>
+</html>

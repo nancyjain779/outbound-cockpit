@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "outreach-cockpit": {
+      "command": "python",
+      "args": ["-m", "mcp_server.server"],
+      "cwd": "outbound-cockpit/outreach-agent",
+      "env": {
+        "NODE_TOOL_BRIDGE_URL": "http://localhost:3000",
+        "COCKPIT_SERVICE_TOKEN": "dev-secret"
+      }
+    }
+  }
+}

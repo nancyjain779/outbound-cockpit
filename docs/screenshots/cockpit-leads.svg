@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="640" viewBox="0 0 1080 640">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e1a"/>
+      <stop offset="100%" style="stop-color:#0d1424"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2f6bff"/>
+      <stop offset="100%" style="stop-color:#1b48d6"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="640" fill="url(#bg)"/>
+  <!-- header -->
+  <rect x="0" y="0" width="1080" height="56" fill="#0a0e1a" opacity="0.95"/>
+  <rect x="24" y="14" width="30" height="30" rx="9" fill="url(#brand)"/>
+  <text x="38" y="34" fill="#fff" font-family="system-ui,sans-serif" font-size="14" font-weight="800" text-anchor="middle">O</text>
+  <text x="66" y="28" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="15" font-weight="700">Outbound Cockpit</text>
+  <text x="66" y="44" fill="#647698" font-family="system-ui,sans-serif" font-size="11">Founder-led outreach</text>
+  <!-- stepper -->
+  <rect x="24" y="68" width="240" height="52" rx="13" fill="#0f1830" stroke="#2f6bff" stroke-width="1.5"/>
+  <text x="36" y="86" fill="#647698" font-family="system-ui,sans-serif" font-size="10" font-weight="700">STEP 1</text>
+  <text x="36" y="106" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="13" font-weight="700">Leads</text>
+  <rect x="276" y="68" width="240" height="52" rx="13" fill="#0f1830" stroke="rgba(255,255,255,0.08)"/>
+  <text x="288" y="86" fill="#647698" font-family="system-ui,sans-serif" font-size="10" font-weight="700">STEP 2</text>
+  <text x="288" y="106" fill="#9db0d0" font-family="system-ui,sans-serif" font-size="13" font-weight="700">Analyse</text>
+  <rect x="528" y="68" width="240" height="52" rx="13" fill="#0f1830" stroke="rgba(255,255,255,0.08)"/>
+  <text x="540" y="86" fill="#647698" font-family="system-ui,sans-serif" font-size="10" font-weight="700">STEP 3</text>
+  <text x="540" y="106" fill="#9db0d0" font-family="system-ui,sans-serif" font-size="13" font-weight="700">Outreach</text>
+  <!-- section title -->
+  <text x="24" y="152" fill="#647698" font-family="system-ui,sans-serif" font-size="12" font-weight="700" letter-spacing="1">TODAY'S LEADS</text>
+  <!-- prospect card 1 -->
+  <rect x="24" y="168" width="1032" height="120" rx="16" fill="#0f1830" stroke="rgba(255,255,255,0.08)"/>
+  <text x="40" y="198" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="16" font-weight="700">Sarah Chen</text>
+  <rect x="160" y="182" width="28" height="20" rx="10" fill="rgba(91,140,255,0.18)"/>
+  <text x="174" y="196" fill="#a9c4ff" font-family="system-ui,sans-serif" font-size="10" font-weight="800" text-anchor="middle">A</text>
+  <text x="200" y="198" fill="#9db0d0" font-family="system-ui,sans-serif" font-size="12">NeuralFlow AI � US</text>
+  <text x="40" y="222" fill="#9db0d0" font-family="system-ui,sans-serif" font-size="12.5">Signal: <tspan fill="#eef3fb" font-weight="600">Raised Series A � hiring ML engineers</tspan></text>
+  <text x="40" y="248" fill="#647698" font-family="system-ui,sans-serif" font-size="11">linkedin.com/in/sarahchen � Apollo match</text>
+  <rect x="880" y="220" width="100" height="32" rx="10" fill="url(#brand)"/>
+  <text x="930" y="241" fill="#fff" font-family="system-ui,sans-serif" font-size="12" font-weight="650" text-anchor="middle">Analyse</text>
+  <!-- prospect card 2 -->
+  <rect x="24" y="300" width="1032" height="120" rx="16" fill="#0f1830" stroke="rgba(255,255,255,0.08)"/>
+  <text x="40" y="330" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="16" font-weight="700">Marcus Webb</text>
+  <rect x="168" y="314" width="28" height="20" rx="10" fill="rgba(34,211,238,0.16)"/>
+  <text x="182" y="328" fill="#8af0ff" font-family="system-ui,sans-serif" font-size="10" font-weight="800" text-anchor="middle">C</text>
+  <text x="208" y="330" fill="#9db0d0" font-family="system-ui,sans-serif" font-size="12">Stealth startup � UK</text>
+  <text x="40" y="354" fill="#9db0d0" font-family="system-ui,sans-serif" font-size="12.5">Signal: <tspan fill="#eef3fb" font-weight="600">Looking for technical co-founder</tspan></text>
+  <text x="40" y="380" fill="#647698" font-family="system-ui,sans-serif" font-size="11">reddit.com/r/startups � Classified track C</text>
+  <rect x="880" y="352" width="100" height="32" rx="10" fill="#16213d" stroke="rgba(255,255,255,0.16)"/>
+  <text x="930" y="373" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="12" font-weight="650" text-anchor="middle">Analyse</text>
+  <!-- bottom nav hint -->
+  <rect x="0" y="580" width="1080" height="60" fill="#070c18"/>
+  <text x="540" y="616" fill="#647698" font-family="system-ui,sans-serif" font-size="11" text-anchor="middle">Leads � Feed � Setup  UI preview (replace with live screenshot after deploy)</text>
+</svg>

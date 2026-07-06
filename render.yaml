@@ -1,0 +1,79 @@
+services:
+  - type: web
+    name: outbound-cockpit
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: AGENT_SERVICE_URL
+        fromService:
+          name: outreach-agent
+          type: web
+          property: hostport
+      - key: AGENT_FALLBACK
+        value: "1"
+      - key: COCKPIT_SERVICE_TOKEN
+        sync: false
+      - key: REDDIT_CLIENT_ID
+        sync: false
+      - key: REDDIT_CLIENT_SECRET
+        sync: false
+      - key: REDDIT_USER_AGENT
+        sync: false
+      - key: APOLLO_API_KEY
+        sync: false
+      - key: APIFY_TOKEN
+        sync: false
+      - key: APIFY_LINKEDIN_PROFILE_ACTOR
+        sync: false
+      - key: APIFY_LINKEDIN_POSTS_ACTOR
+        sync: false
+      - key: APIFY_LINKEDIN_POST_SEARCH_ACTOR
+        sync: false
+      - key: PERPLEXITY_API_KEY
+        sync: false
+      - key: PERPLEXITY_MODEL
+        sync: false
+      - key: PERPLEXITY_DEEP_MODEL
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB
+        sync: false
+
+  - type: web
+    name: outreach-agent
+    runtime: python
+    plan: free
+    rootDir: outreach-agent
+    buildCommand: pip install -e .
+    startCommand: uvicorn agent.api.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+      - key: NODE_TOOL_BRIDGE_URL
+        fromService:
+          name: outbound-cockpit
+          type: web
+          property: hostport
+      - key: COCKPIT_SERVICE_TOKEN
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_DB
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: LITELLM_MODEL
+        sync: false
+      - key: PERPLEXITY_API_KEY
+        sync: false

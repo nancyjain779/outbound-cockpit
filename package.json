@@ -1,0 +1,19 @@
+{
+  "name": "outbound-cockpit",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Standalone daily outreach cockpit (UI + lead-sourcing API). Deployable on Render.",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "COCKPIT_DEV=1 node server.js",
+    "check:apollo": "node scripts/check-apollo.mjs",
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "mongodb": "^7.2.0"
+  }
+}

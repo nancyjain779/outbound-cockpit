@@ -1,0 +1,9 @@
+node_modules
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+outreach-agent/**/*.egg-info/
+outreach-agent/**/__pycache__/
+outreach-agent/**/.pytest_cache/

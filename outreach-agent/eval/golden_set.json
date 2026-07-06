@@ -1,0 +1,47 @@
+[
+  {
+    "id": "funded_cto",
+    "prospect": {
+      "name": "Alex Chen",
+      "company": "NovaML",
+      "domain": "novaml.io",
+      "track": "A",
+      "geo": "US-NRI",
+      "platform": "LinkedIn",
+      "signal": "Scaling AI features under enterprise scrutiny",
+      "profile": "https://linkedin.com/in/example"
+    },
+    "openerKeys": ["raised", "ai_arch", "soc2", "hiring_eng", "scaling", "default"]
+  },
+  {
+    "id": "enterprise_innovation",
+    "prospect": {
+      "name": "Priya Sharma",
+      "company": "GlobalBank Digital",
+      "domain": "globalbank.com",
+      "track": "B",
+      "signal": "Digital transformation mandate"
+    },
+    "openerKeys": ["intro", "innovation_role", "transformation", "default"]
+  },
+  {
+    "id": "first_time_founder",
+    "prospect": {
+      "name": "Jordan Lee",
+      "company": "StealthCo",
+      "track": "C",
+      "signal": "Looking for development partner for MVP"
+    },
+    "openerKeys": ["cofounder", "just_incorporated", "find_dev", "default"]
+  },
+  {
+    "id": "idea_stage",
+    "prospect": {
+      "name": "Sam Rivera",
+      "track": "D",
+      "platform": "Reddit",
+      "signal": "Have an idea for a marketplace app — what would it cost?"
+    },
+    "openerKeys": ["cofounder", "new_founder", "idea_help", "mvp_cost", "default"]
+  }
+]

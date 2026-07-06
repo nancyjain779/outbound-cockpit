@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="640" viewBox="0 0 1080 640">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0e1a"/>
+      <stop offset="100%" style="stop-color:#0d1424"/>
+    </linearGradient>
+    <linearGradient id="brand" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2f6bff"/>
+      <stop offset="100%" style="stop-color:#1b48d6"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="640" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1080" height="56" fill="#0a0e1a" opacity="0.95"/>
+  <rect x="24" y="14" width="30" height="30" rx="9" fill="url(#brand)"/>
+  <text x="38" y="34" fill="#fff" font-family="system-ui,sans-serif" font-size="14" font-weight="800" text-anchor="middle">O</text>
+  <text x="66" y="28" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="15" font-weight="700">Outbound Cockpit</text>
+  <!-- stepper step 2 active -->
+  <rect x="276" y="68" width="240" height="52" rx="13" fill="#0f1830" stroke="#2f6bff" stroke-width="1.5"/>
+  <text x="288" y="86" fill="#647698" font-family="system-ui,sans-serif" font-size="10" font-weight="700">STEP 2</text>
+  <text x="288" y="106" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="13" font-weight="700">Analyse</text>
+  <!-- left: brief -->
+  <text x="24" y="152" fill="#647698" font-family="system-ui,sans-serif" font-size="12" font-weight="700" letter-spacing="1">ANALYSIS BRIEF</text>
+  <rect x="24" y="168" width="520" height="420" rx="16" fill="#0f1830" stroke="rgba(255,255,255,0.08)"/>
+  <text x="40" y="198" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="14" font-weight="700">Sarah Chen � NeuralFlow AI</text>
+  <text x="40" y="222" fill="#2fd478" font-family="system-ui,sans-serif" font-size="11" font-weight="700">Strong fit � 78/100</text>
+  <text x="40" y="252" fill="#647698" font-family="system-ui,sans-serif" font-size="11" font-weight="700">NEEDS</text>
+  <text x="40" y="272" fill="#9db0d0" font-family="system-ui,sans-serif" font-size="12">" Reliable eval/RAG as usage scales</text>
+  <text x="40" y="292" fill="#9db0d0" font-family="system-ui,sans-serif" font-size="12">" Engineering capacity without headcount</text>
+  <text x="40" y="322" fill="#647698" font-family="system-ui,sans-serif" font-size="11" font-weight="700">DRAFT MESSAGE</text>
+  <rect x="40" y="334" width="488" height="100" rx="11" fill="#070c18" stroke="rgba(255,255,255,0.08)"/>
+  <text x="52" y="358" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="12">Hi Sarah  saw the Series A and the ML eng hires.</text>
+  <text x="52" y="378" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="12">Curious how you're keeping the AI side reliable</text>
+  <text x="52" y="398" fill="#eef3fb" font-family="system-ui,sans-serif" font-size="12">as usage scales  that's usually where it gets hard.</text>
+  <rect x="40" y="450" width="120" height="32" rx="10" fill="url(#brand)"/>
+  <text x="100" y="471" fill="#fff" font-family="system-ui,sans-serif" font-size="12" font-weight="650" text-anchor="middle">Copy draft</text>
+  <!-- right: agent trace -->
+  <text x="560" y="152" fill="#647698" font-family="system-ui,sans-serif" font-size="12" font-weight="700" letter-spacing="1">AGENT TRACE</text>
+  <rect x="560" y="168" width="496" height="420" rx="16" fill="#0f1830" stroke="rgba(255,255,255,0.08)"/>
+  <circle cx="580" cy="200" r="6" fill="#2fd478"/>
+  <text x="596" y="204" fill="#eef3fb" font-family="monospace" font-size="11">plan � enrich_company, web_research, validate</text>
+  <circle cx="580" cy="232" r="6" fill="#2fd478"/>
+  <text x="596" y="236" fill="#9db0d0" font-family="monospace" font-size="11">tool � enrich_company  Apollo org + 3 roles</text>
+  <circle cx="580" cy="264" r="6" fill="#2fd478"/>
+  <text x="596" y="268" fill="#9db0d0" font-family="monospace" font-size="11">tool � web_research  4 sources</text>
+  <circle cx="580" cy="296" r="6" fill="#2fd478"/>
+  <text x="596" y="300" fill="#9db0d0" font-family="monospace" font-size="11">synthesize � brief + draft</text>
+  <circle cx="580" cy="328" r="6" fill="#2fd478"/>
+  <text x="596" y="332" fill="#9db0d0" font-family="monospace" font-size="11">validate � pass score 91</text>
+  <circle cx="580" cy="360" r="6" fill="#2fd478"/>
+  <text x="596" y="364" fill="#9db0d0" font-family="monospace" font-size="11">persist � saved to CRM</text>
+  <rect x="576" y="388" width="464" height="2" fill="rgba(47,107,255,0.3)"/>
+  <text x="576" y="416" fill="#647698" font-family="system-ui,sans-serif" font-size="11">SSE stream: plan � tool � synthesize � validate � final</text>
+  <text x="576" y="436" fill="#647698" font-family="system-ui,sans-serif" font-size="11">LangGraph + 12 MCP tools � UI preview</text>
+</svg>
